@@ -4,10 +4,11 @@ package main
 import (
 	"log"
 	"net/http"
-	"server/controllers"
 	"server/database"
 	"server/models"
+	"server/routes"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -20,22 +21,24 @@ func main() {
 	r := mux.NewRouter()
 
 	// Register the routes
-	r.HandleFunc("/students", controllers.GetStudents).Methods("GET")
-	r.HandleFunc("/students", controllers.CreateStudent).Methods("POST")
-	r.HandleFunc("/students/{id}", controllers.GetStudent).Methods("GET")
-	r.HandleFunc("/students/{id}", controllers.UpdateStudent).Methods("PUT")
-	r.HandleFunc("/students/{id}", controllers.DeleteStudent).Methods("DELETE")
-	r.HandleFunc("/attendance/{id}", controllers.Attendance).Methods("POST")
-	//mark mood <if checkout button is true then mark mood.isDaily = true>
-	//r.HandleFunc("/students/{id}/mood", controllers.mood).Methods("POST")
+	routes.RegisterStudentRoutes(r)
+
+	// CORS setup
+	corsMiddleware := handlers.CORS(
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
+		handlers.AllowedOrigins([]string{"*"}),
+	)
 
 	// Start the server
-	log.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		log.Fatalf("Could not start server: %s\n", err.Error())
+	log.Println("Server started at http://localhost:8080")
+	if err := http.ListenAndServe(":8080", corsMiddleware(r)); err != nil {
+		log.Fatalf("Could not start server: %s\n", err)
 	}
 }
 
 /*
 curl -X POST http://localhost:8080/students -H "Content-Type: application/json" -d '{"name": "John Doe","age": 21,"email": "john.doe@example.com"}'
+curl -X POST http://localhost:8080/moods \-H "Content-Type: application/json" \-d '{    "student_id": 1,    "emotion": "happy",    "is_daily": true}'
+curl -X GET http://localhost:8080/students
 */

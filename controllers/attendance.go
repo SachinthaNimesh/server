@@ -3,72 +3,63 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
-	"server/database"
 	"server/models"
+	"strconv"
 	"time"
 
-	"strconv"
-
 	"github.com/gorilla/mux"
-	"github.com/twpayne/go-geom"
-	"github.com/twpayne/go-geom/encoding/wkt"
+	"gorm.io/gorm"
 )
 
-// Attendance handles the creation and update of attendance records for a student
-func Attendance(w http.ResponseWriter, r *http.Request) {
+// Global DB instance
+var db *gorm.DB
+
+func PostAttendance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	studentIDStr := vars["id"]
-	studentID, err := strconv.Atoi(studentIDStr)
+	studentID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid student ID", http.StatusBadRequest)
 		return
 	}
 
-	var input struct {
-		Action   string `json:"action"`
-		Location string `json:"location"`
+	var requestData struct {
+		CheckIn   bool    `json:"check_in"`
+		Latitude  float64 `json:"check_in_lat"`
+		Longitude float64 `json:"check_in_long"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var attendance models.Attendance
-	location, err := wkt.Unmarshal(input.Location)
-	if err != nil {
-		http.Error(w, "Invalid location format", http.StatusBadRequest)
-		return
-	}
+	if requestData.CheckIn {
+		attendance.StudentID = studentID
+		attendance.CheckInLatitude = requestData.Latitude
+		attendance.CheckInLongitude = requestData.Longitude
+		attendance.CheckInDateTime = time.Now()
 
-	point := location.(*geom.Point)
-	point.SetSRID(4326)
-
-	if input.Action == "checkIn" {
-		attendance = models.Attendance{
-			StudentID:       studentID,
-			CheckInDateTime: time.Now(),
-			CheckInLocation: *point,
-		}
-		if err := database.DB.Create(&attendance).Error; err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	} else if input.Action == "checkOut" {
-		if err := database.DB.Where("student_id = ? AND DATE(check_in_date_time) = ?", studentID, time.Now().Format("2006-01-02")).First(&attendance).Error; err != nil {
-			http.Error(w, "Attendance record not found", http.StatusNotFound)
-			return
-		}
-		attendance.CheckOutDateTime = time.Now()
-		attendance.CheckOutLocation = *point
-		if err := database.DB.Save(&attendance).Error; err != nil {
+		if err := db.Create(&attendance).Error; err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	} else {
-		http.Error(w, "Invalid action", http.StatusBadRequest)
-		return
+		if err := db.Where("student_id = ? AND DATE(check_in_date_time) = ?", studentID, time.Now().Format("2006-01-02")).First(&attendance).Error; err != nil {
+			http.Error(w, "Check-in record not found for today", http.StatusNotFound)
+			return
+		}
+
+		attendance.CheckOutLatitude = requestData.Latitude
+		attendance.CheckOutLongitude = requestData.Longitude
+		attendance.CheckOutDateTime = time.Now()
+
+		if err := db.Save(&attendance).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(attendance)
 }
