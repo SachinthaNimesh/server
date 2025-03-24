@@ -27,7 +27,7 @@ func main() {
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedOrigins([]string{"*"}), //restrict this in the production
 	)
 
 	// Start the server

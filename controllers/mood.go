@@ -3,6 +3,7 @@ package controllers
 //implement post method for mood saving
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"server/database"
 	"server/models"
@@ -60,6 +61,7 @@ func GetMood(w http.ResponseWriter, r *http.Request) {
 // @Param mood body models.Mood true "Mood"
 // @Success 200 {object} models.Mood
 // @Router /moods [post]
+/* corrected CreateMood rest of the functions should follow this structure */
 func CreateMood(w http.ResponseWriter, r *http.Request) {
 	var mood models.Mood
 	if err := json.NewDecoder(r.Body).Decode(&mood); err != nil {
@@ -67,11 +69,15 @@ func CreateMood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Set the RecordedAt field to the current time
 	mood.RecordedAt = time.Now()
+
 	if err := database.DB.Create(&mood).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error creating mood: %v", err) // Add this line
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(mood)
 }
