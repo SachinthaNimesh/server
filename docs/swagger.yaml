@@ -1,14 +1,5 @@
-swagger: "2.0"
-info:
-  title: API Documentation
-  version: 1.0.0
-  contact:
-    name: API Support
-    email: support@example.com
-
 definitions:
-  Mood:
-    type: object
+  models.Mood:
     properties:
       emotion:
         type: string
@@ -20,9 +11,8 @@ definitions:
         type: string
       student_id:
         type: integer
-
-  Student:
     type: object
+  models.Student:
     properties:
       address_line1:
         type: string
@@ -49,16 +39,15 @@ definitions:
       last_name:
         type: string
       photo:
-        type: array
         items:
           type: integer
+        type: array
       remarks:
         type: string
       supervisor_id:
         type: integer
-
-  Supervisor:
     type: object
+  models.Supervisor:
     properties:
       contact_number:
         type: string
@@ -72,260 +61,275 @@ definitions:
         type: integer
       supervisor_id:
         type: integer
-
+    type: object
+info:
+  title: Employer Management System
+  version: 1.0.0
+  contact: {}
 paths:
   /moods:
     get:
       consumes:
-        - application/json
+      - application/json
       description: Get details of all moods
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: array
             items:
-              $ref: '#/definitions/Mood'
+              $ref: '#/definitions/models.Mood'
+            type: array
       summary: Get all moods
       tags:
-        - moods
+      - moods
     post:
       consumes:
-        - application/json
-      description: Create a new mood
+      - application/json
+      description: Create a new mood with the input payload
       parameters:
-        - in: body
-          name: mood
-          description: Mood object
-          required: true
-          schema:
-            $ref: '#/definitions/Mood'
+      - description: Mood
+        in: body
+        name: mood
+        required: true
+        schema:
+          $ref: '#/definitions/models.Mood'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
-          description: Created
+          description: OK
           schema:
-            $ref: '#/definitions/Mood'
+            $ref: '#/definitions/models.Mood'
       summary: Create a new mood
       tags:
-        - moods
-
+      - moods
   /moods/{id}:
-    get:
-      consumes:
-        - application/json
-      description: Get a mood by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Mood'
-      summary: Get a mood by ID
-      tags:
-        - moods
-
-  /students:
-    get:
-      consumes:
-        - application/json
-      description: Get all students
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Student'
-      summary: Get all students
-      tags:
-        - students
-    post:
-      consumes:
-        - application/json
-      description: Create a new student
-      parameters:
-        - in: body
-          name: student
-          required: true
-          schema:
-            $ref: '#/definitions/Student'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: Created
-          schema:
-            $ref: '#/definitions/Student'
-      summary: Create a new student
-      tags:
-        - students
-
-  /students/{id}:
-    get:
-      consumes:
-        - application/json
-      description: Get a student by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/Student'
-      summary: Get a student by ID
-      tags:
-        - students
-    put:
-      consumes:
-        - application/json
-      description: Update a student by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          type: integer
-        - in: body
-          name: student
-          required: true
-          schema:
-            $ref: '#/definitions/Student'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: Updated
-          schema:
-            $ref: '#/definitions/Student'
-      summary: Update a student by ID
-      tags:
-        - students
     delete:
       consumes:
-        - application/json
-      description: Delete a student by ID
+      - application/json
+      description: Delete a mood by ID
       parameters:
-        - in: path
-          name: id
-          required: true
-          type: integer
+      - description: Mood ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
       responses:
         "204":
           description: No Content
-      summary: Delete a student by ID
+      summary: Delete a mood by ID
       tags:
-        - students
-
+      - moods
+    get:
+      consumes:
+      - application/json
+      description: Get details of a mood by ID
+      parameters:
+      - description: Mood ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Mood'
+      summary: Get a mood by ID
+      tags:
+      - moods
+    put:
+      consumes:
+      - application/json
+      description: Update details of a mood by ID
+      parameters:
+      - description: Mood ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Mood
+        in: body
+        name: mood
+        required: true
+        schema:
+          $ref: '#/definitions/models.Mood'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Mood'
+      summary: Update a mood by ID
+      tags:
+      - moods
+  /students:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all students
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Student'
+            type: array
+      summary: Get all students
+      tags:
+      - students
+    post:
+      consumes:
+      - application/json
+      description: Create a new student with the input payload
+      parameters:
+      - description: Student
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/models.Student'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Student'
+      summary: Create a new student
+      tags:
+      - students
+  /students/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a student by ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Student'
+      summary: Get a student by ID
+      tags:
+      - students
   /supervisors:
     get:
       consumes:
-        - application/json
-      description: Get all supervisors
+      - application/json
+      description: Get details of all supervisors
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: array
             items:
-              $ref: '#/definitions/Supervisor'
+              $ref: '#/definitions/models.Supervisor'
+            type: array
       summary: Get all supervisors
       tags:
-        - supervisors
+      - supervisors
     post:
       consumes:
-        - application/json
-      description: Create a new supervisor
+      - application/json
+      description: Create a new supervisor with the input payload
       parameters:
-        - in: body
-          name: supervisor
-          required: true
-          schema:
-            $ref: '#/definitions/Supervisor'
+      - description: Supervisor
+        in: body
+        name: supervisor
+        required: true
+        schema:
+          $ref: '#/definitions/models.Supervisor'
       produces:
-        - application/json
-      responses:
-        "200":
-          description: Created
-          schema:
-            $ref: '#/definitions/Supervisor'
-      summary: Create a new supervisor
-      tags:
-        - supervisors
-
-  /supervisors/{id}:
-    get:
-      consumes:
-        - application/json
-      description: Get a supervisor by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Supervisor'
-      summary: Get a supervisor by ID
+            $ref: '#/definitions/models.Supervisor'
+      summary: Create a new supervisor
       tags:
-        - supervisors
-    put:
-      consumes:
-        - application/json
-      description: Update a supervisor by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          type: integer
-        - in: body
-          name: supervisor
-          required: true
-          schema:
-            $ref: '#/definitions/Supervisor'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: Updated
-          schema:
-            $ref: '#/definitions/Supervisor'
-      summary: Update a supervisor by ID
-      tags:
-        - supervisors
+      - supervisors
+  /supervisors/{id}:
     delete:
       consumes:
-        - application/json
+      - application/json
       description: Delete a supervisor by ID
       parameters:
-        - in: path
-          name: id
-          required: true
-          type: integer
+      - description: Supervisor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
       responses:
         "204":
           description: No Content
       summary: Delete a supervisor by ID
       tags:
-        - supervisors
+      - supervisors
+    get:
+      consumes:
+      - application/json
+      description: Get details of a supervisor by ID
+      parameters:
+      - description: Supervisor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Supervisor'
+      summary: Get a supervisor by ID
+      tags:
+      - supervisors
+    put:
+      consumes:
+      - application/json
+      description: Update details of a supervisor by ID
+      parameters:
+      - description: Supervisor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Supervisor
+        in: body
+        name: supervisor
+        required: true
+        schema:
+          $ref: '#/definitions/models.Supervisor'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Supervisor'
+      summary: Update a supervisor by ID
+      tags:
+      - supervisors
+swagger: "2.0"
