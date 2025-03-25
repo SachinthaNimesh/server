@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: Student Management API
+  description: API for managing students, attendance, moods, employers, and supervisors.
+  version: 1.0.0
+paths:
+  /students:
+    get:
+      summary: Get all students
+      operationId: getStudents
+      responses:
+        '200':
+          description: A list of students
+    post:
+      summary: Create a new student
+      operationId: createStudent
+      responses:
+        '201':
+          description: Student created successfully
+  /students/{id}:
+    get:
+      summary: Get a student by ID
+      operationId: getStudent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Student details
+    put:
+      summary: Update a student by ID
+      operationId: updateStudent
+      responses:
+        '200':
+          description: Student updated successfully
+    delete:
+      summary: Delete a student by ID
+      operationId: deleteStudent
+      responses:
+        '204':
+          description: Student deleted successfully
+  /attendance/{id}:
+    post:
+      summary: Post student attendance
+      operationId: postAttendance
+      responses:
+        '200':
+          description: Attendance recorded
+  /moods:
+    post:
+      summary: Create a mood
+      operationId: createMood
+      responses:
+        '201':
+          description: Mood created
+  /moods/{id}:
+    get:
+      summary: Get a mood by ID
+      operationId: getMood
+      responses:
+        '200':
+          description: Mood details
+  /employers:
+    post:
+      summary: Create an employer
+      operationId: createEmployer
+      responses:
+        '201':
+          description: Employer created
+  /employers/{id}:
+    get:
+      summary: Get an employer by ID
+      operationId: getEmployer
+      responses:
+        '200':
+          description: Employer details
+    put:
+      summary: Update an employer by ID
+      operationId: updateEmployer
+      responses:
+        '200':
+          description: Employer updated
+    delete:
+      summary: Delete an employer by ID
+      operationId: deleteEmployer
+      responses:
+        '204':
+          description: Employer deleted
+  /supervisors:
+    get:
+      summary: Get all supervisors
+      operationId: getSupervisors
+      responses:
+        '200':
+          description: List of supervisors
+    post:
+      summary: Create a supervisor
+      operationId: createSupervisor
+      responses:
+        '201':
+          description: Supervisor created
+  /supervisors/{id}:
+    get:
+      summary: Get a supervisor by ID
+      operationId: getSupervisor
+      responses:
+        '200':
+          description: Supervisor details
+    put:
+      summary: Update a supervisor by ID
+      operationId: updateSupervisor
+      responses:
+        '200':
+          description: Supervisor updated
+    delete:
+      summary: Delete a supervisor by ID
+      operationId: deleteSupervisor
+      responses:
+        '204':
+          description: Supervisor deleted
+---
+components:
+  choreo:
+    services:
+      - name: StudentService
+        endpoints:
+          - url: /students
+            methods: [GET, POST]
+          - url: /students/{id}
+            methods: [GET, PUT, DELETE]
+      - name: AttendanceService
+        endpoints:
+          - url: /attendance/{id}
+            methods: [POST]
+      - name: MoodService
+        endpoints:
+          - url: /moods
+            methods: [POST]
+          - url: /moods/{id}
+            methods: [GET]
+      - name: EmployerService
+        endpoints:
+          - url: /employers
+            methods: [POST]
+          - url: /employers/{id}
+            methods: [GET, PUT, DELETE]
+      - name: SupervisorService
+        endpoints:
+          - url: /supervisors
+            methods: [GET, POST]
+          - url: /supervisors/{id}
+            methods: [GET, PUT, DELETE]
