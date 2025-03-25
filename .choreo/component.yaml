@@ -1,22 +1,29 @@
-# +required Version of the endpoint configuration YAML
-version: 1.0
+# +required The configuration file schema version
+schemaVersion: 1.1
 
-# +required List of endpoints to create
+# +optional Incoming connection details for the component
 endpoints:
-  # +required Unique name for the endpoint. (This name will be used when generating the managed API)
+  # +required Unique name for the endpoint.
+  # This name will be used when generating the managed API
   - name: Student Management API
-    # +required Numeric port value that gets exposed via this endpoint
-    port: 8080
-    # +required Type of the traffic this endpoint is accepting. Example: REST, GraphQL, etc.
-    # Allowed values: REST, GraphQL, GRPC
+    # +optional Display name for the endpoint.
+    displayName: Student Management API
+    # +required Service section has the user service endpoint details
+    service:
+      # +optional Base path of the API that gets exposed via the endpoint.
+      # This is mandatory if the endpoint type is set to REST or GraphQL.
+      basePath: /api
+      # +required Numeric port value that gets exposed via the endpoint
+      port: 8080
+    # +required Type of traffic that the endpoint is accepting.
+    # Allowed values: REST, GraphQL, GRPC, TCP, UDP.
     type: REST
-    # +optional Network level visibility of this endpoint. Defaults to Project
-    # Accepted values: Project|Organization|Public.
-    networkVisibility: Public
-    # +optional Context (base path) of the API that is exposed via this endpoint.
-    # This is mandatory if the endpoint type is set to REST or GraphQL.
-    context: /api
-    # +optional Path to the schema definition file. Defaults to wildcard route if not provided
+    # +optional Network level visibilities of the endpoint.
+    # Accepted values: Project|Organization|Public(Default).
+    networkVisibilities:
+      - Public
+    # +optional The path to the schema definition file.
+    # Defaults to wildcard route if not specified.
     # This is only applicable to REST endpoint types.
-    # The path should be relative to the project directory.
+    # The path should be relative to the docker context.
     schemaFilePath: openapi.yaml
