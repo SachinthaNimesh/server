@@ -1,0 +1,379 @@
+openapi: 3.0.0
+info:
+  title: Student Management API
+  description: API for managing students, attendance, moods, employers, and supervisors.
+  version: 1.0.0
+paths:
+  /students:
+    get:
+      summary: Get all students
+      operationId: getStudents
+      responses:
+        '200':
+          description: A list of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+    post:
+      summary: Create a new student
+      operationId: createStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+      responses:
+        '201':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+  /students/{id}:
+    get:
+      summary: Get a student by ID
+      operationId: getStudent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Student details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+    put:
+      summary: Update a student by ID
+      operationId: updateStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+      responses:
+        '200':
+          description: Student updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+    delete:
+      summary: Delete a student by ID
+      operationId: deleteStudent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Student deleted successfully
+  /attendance/{id}:
+    post:
+      summary: Post student attendance
+      operationId: postAttendance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                student_id:
+                  type: integer
+                date:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Attendance recorded
+  /moods:
+    get:
+      summary: Get all moods
+      operationId: getMoods
+      responses:
+        '200':
+          description: A list of moods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Mood'
+    post:
+      summary: Create a mood
+      operationId: createMood
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mood'
+      responses:
+        '201':
+          description: Mood created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mood'
+  /moods/{id}:
+    get:
+      summary: Get a mood by ID
+      operationId: getMood
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Mood details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mood'
+  /employers:
+    post:
+      summary: Create an employer
+      operationId: createEmployer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                address:
+                  type: string
+                contact_number:
+                  type: string
+      responses:
+        '201':
+          description: Employer created
+  /employers/{id}:
+    get:
+      summary: Get an employer by ID
+      operationId: getEmployer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employer details
+    put:
+      summary: Update an employer by ID
+      operationId: updateEmployer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                address:
+                  type: string
+                contact_number:
+                  type: string
+      responses:
+        '200':
+          description: Employer updated
+    delete:
+      summary: Delete an employer by ID
+      operationId: deleteEmployer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Employer deleted
+  /supervisors:
+    get:
+      summary: Get all supervisors
+      operationId: getSupervisors
+      responses:
+        '200':
+          description: List of supervisors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Supervisor'
+    post:
+      summary: Create a supervisor
+      operationId: createSupervisor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Supervisor'
+      responses:
+        '201':
+          description: Supervisor created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supervisor'
+  /supervisors/{id}:
+    get:
+      summary: Get a supervisor by ID
+      operationId: getSupervisor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Supervisor details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supervisor'
+    put:
+      summary: Update a supervisor by ID
+      operationId: updateSupervisor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Supervisor'
+      responses:
+        '200':
+          description: Supervisor updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supervisor'
+    delete:
+      summary: Delete a supervisor by ID
+      operationId: deleteSupervisor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Supervisor deleted
+components:
+  schemas:
+    Mood:
+      type: object
+      properties:
+        emotion:
+          type: string
+        id:
+          type: integer
+        is_daily:
+          type: boolean
+        recorded_at:
+          type: string
+        student_id:
+          type: integer
+    Student:
+      type: object
+      properties:
+        address_line1:
+          type: string
+        address_line2:
+          type: string
+        city:
+          type: string
+        contact_number:
+          type: string
+        contact_number_guardian:
+          type: string
+        dob:
+          type: string
+        employer_id:
+          type: integer
+        first_name:
+          type: string
+        gender:
+          type: string
+        home_coordinates:
+          type: string
+        id:
+          type: integer
+        last_name:
+          type: string
+        photo:
+          type: array
+          items:
+            type: integer
+        remarks:
+          type: string
+        supervisor_id:
+          type: integer
+    Supervisor:
+      type: object
+      properties:
+        contact_number:
+          type: string
+        email_address:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        student_id:
+          type: integer
+        supervisor_id:
+          type: integer
+  choreo:
+    services:
+      - name: StudentService
+        endpoints:
+          - url: /students
+            methods: [GET, POST]
+          - url: /students/{id}
+            methods: [GET, PUT, DELETE]
+      - name: AttendanceService
+        endpoints:
+          - url: /attendance/{id}
+            methods: [POST]
+      - name: MoodService
+        endpoints:
+          - url: /moods
+            methods: [GET, POST]
+          - url: /moods/{id}
+            methods: [GET]
+      - name: EmployerService
+        endpoints:
+          - url: /employers
+            methods: [POST]
+          - url: /employers/{id}
+            methods: [GET, PUT, DELETE]
+      - name: SupervisorService
+        endpoints:
+          - url: /supervisors
+            methods: [GET, POST]
+          - url: /supervisors/{id}
+            methods: [GET, PUT, DELETE]
