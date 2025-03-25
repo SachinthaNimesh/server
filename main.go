@@ -8,6 +8,8 @@ import (
 	"server/models"
 	"server/routes"
 
+	httpSwagger "github.com/swaggo/http-swagger"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -35,6 +37,8 @@ func main() {
 	if err := http.ListenAndServe(":8080", corsMiddleware(r)); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}
+	//Serve swagger documentation
+	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 }
 
 /*
