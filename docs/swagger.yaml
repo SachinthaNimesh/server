@@ -39,9 +39,9 @@ definitions:
       last_name:
         type: string
       photo:
+        type: array
         items:
           type: integer
-        type: array
       remarks:
         type: string
       supervisor_id:
@@ -106,24 +106,6 @@ paths:
       tags:
       - moods
   /moods/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a mood by ID
-      parameters:
-      - description: Mood ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-      summary: Delete a mood by ID
-      tags:
-      - moods
     get:
       consumes:
       - application/json
@@ -142,32 +124,6 @@ paths:
           schema:
             $ref: '#/definitions/models.Mood'
       summary: Get a mood by ID
-      tags:
-      - moods
-    put:
-      consumes:
-      - application/json
-      description: Update details of a mood by ID
-      parameters:
-      - description: Mood ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Mood
-        in: body
-        name: mood
-        required: true
-        schema:
-          $ref: '#/definitions/models.Mood'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Mood'
-      summary: Update a mood by ID
       tags:
       - moods
   /students:
@@ -229,6 +185,177 @@ paths:
       summary: Get a student by ID
       tags:
       - students
+    put:
+      consumes:
+      - application/json
+      description: Update details of a student by ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Student
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/models.Student'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Student'
+      summary: Update a student by ID
+      tags:
+      - students
+    delete:
+      consumes:
+      - application/json
+      description: Delete a student by ID
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a student by ID
+      tags:
+      - students
+  /attendance/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Post attendance for a student by ID
+      parameters:
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Attendance
+        in: body
+        name: attendance
+        required: true
+        schema:
+          type: object
+          properties:
+            student_id:
+              type: integer
+            date:
+              type: string
+            status:
+              type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Post attendance for a student by ID
+      tags:
+      - attendance
+  /employers:
+    post:
+      consumes:
+      - application/json
+      description: Create a new employer with the input payload
+      parameters:
+      - description: Employer
+        in: body
+        name: employer
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+            contact_number:
+              type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create a new employer
+      tags:
+      - employers
+  /employers/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of an employer by ID
+      parameters:
+      - description: Employer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Get an employer by ID
+      tags:
+      - employers
+    put:
+      consumes:
+      - application/json
+      description: Update details of an employer by ID
+      parameters:
+      - description: Employer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Employer
+        in: body
+        name: employer
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+            contact_number:
+              type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update an employer by ID
+      tags:
+      - employers
+    delete:
+      consumes:
+      - application/json
+      description: Delete an employer by ID
+      parameters:
+      - description: Employer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete an employer by ID
+      tags:
+      - employers
   /supervisors:
     get:
       consumes:
@@ -268,24 +395,6 @@ paths:
       tags:
       - supervisors
   /supervisors/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a supervisor by ID
-      parameters:
-      - description: Supervisor ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-      summary: Delete a supervisor by ID
-      tags:
-      - supervisors
     get:
       consumes:
       - application/json
@@ -330,6 +439,24 @@ paths:
           schema:
             $ref: '#/definitions/models.Supervisor'
       summary: Update a supervisor by ID
+      tags:
+      - supervisors
+    delete:
+      consumes:
+      - application/json
+      description: Delete a supervisor by ID
+      parameters:
+      - description: Supervisor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a supervisor by ID
       tags:
       - supervisors
 swagger: "2.0"
