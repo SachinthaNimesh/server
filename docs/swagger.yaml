@@ -1,5 +1,11 @@
+swagger: "2.0"
+info:
+  title: API Documentation
+  version: 1.0.0
+  contact: {}
 definitions:
   models.Mood:
+    type: object
     properties:
       emotion:
         type: string
@@ -11,8 +17,8 @@ definitions:
         type: string
       student_id:
         type: integer
-    type: object
   models.Student:
+    type: object
     properties:
       address_line1:
         type: string
@@ -46,8 +52,8 @@ definitions:
         type: string
       supervisor_id:
         type: integer
-    type: object
   models.Supervisor:
+    type: object
     properties:
       contact_number:
         type: string
@@ -61,11 +67,6 @@ definitions:
         type: integer
       supervisor_id:
         type: integer
-    type: object
-info:
-  title: API Documentation
-  version: 1.0.0
-  contact: {}
 paths:
   /moods:
     get:
@@ -78,9 +79,9 @@ paths:
         "200":
           description: OK
           schema:
+            type: array
             items:
               $ref: '#/definitions/models.Mood'
-            type: array
       summary: Get all moods
       tags:
       - moods
@@ -89,9 +90,9 @@ paths:
       - application/json
       description: Create a new mood with the input payload
       parameters:
-      - description: Mood
-        in: body
+      - in: body
         name: mood
+        description: Mood
         required: true
         schema:
           $ref: '#/definitions/models.Mood'
@@ -111,9 +112,9 @@ paths:
       - application/json
       description: Get details of a mood by ID
       parameters:
-      - description: Mood ID
-        in: path
+      - in: path
         name: id
+        description: Mood ID
         required: true
         type: integer
       produces:
@@ -137,9 +138,9 @@ paths:
         "200":
           description: OK
           schema:
+            type: array
             items:
               $ref: '#/definitions/models.Student'
-            type: array
       summary: Get all students
       tags:
       - students
@@ -148,9 +149,9 @@ paths:
       - application/json
       description: Create a new student with the input payload
       parameters:
-      - description: Student
-        in: body
+      - in: body
         name: student
+        description: Student
         required: true
         schema:
           $ref: '#/definitions/models.Student'
@@ -170,9 +171,9 @@ paths:
       - application/json
       description: Get details of a student by ID
       parameters:
-      - description: Student ID
-        in: path
+      - in: path
         name: id
+        description: Student ID
         required: true
         type: integer
       produces:
@@ -190,14 +191,14 @@ paths:
       - application/json
       description: Update details of a student by ID
       parameters:
-      - description: Student ID
-        in: path
+      - in: path
         name: id
+        description: Student ID
         required: true
         type: integer
-      - description: Student
-        in: body
+      - in: body
         name: student
+        description: Student
         required: true
         schema:
           $ref: '#/definitions/models.Student'
@@ -216,9 +217,9 @@ paths:
       - application/json
       description: Delete a student by ID
       parameters:
-      - description: Student ID
-        in: path
+      - in: path
         name: id
+        description: Student ID
         required: true
         type: integer
       produces:
@@ -235,14 +236,14 @@ paths:
       - application/json
       description: Post attendance for a student by ID
       parameters:
-      - description: Attendance ID
-        in: path
+      - in: path
         name: id
+        description: Attendance ID
         required: true
         type: integer
-      - description: Attendance
-        in: body
+      - in: body
         name: attendance
+        description: Attendance
         required: true
         schema:
           type: object
@@ -267,9 +268,9 @@ paths:
       - application/json
       description: Create a new employer with the input payload
       parameters:
-      - description: Employer
-        in: body
+      - in: body
         name: employer
+        description: Employer
         required: true
         schema:
           type: object
@@ -294,9 +295,9 @@ paths:
       - application/json
       description: Get details of an employer by ID
       parameters:
-      - description: Employer ID
-        in: path
+      - in: path
         name: id
+        description: Employer ID
         required: true
         type: integer
       produces:
@@ -312,14 +313,14 @@ paths:
       - application/json
       description: Update details of an employer by ID
       parameters:
-      - description: Employer ID
-        in: path
+      - in: path
         name: id
+        description: Employer ID
         required: true
         type: integer
-      - description: Employer
-        in: body
+      - in: body
         name: employer
+        description: Employer
         required: true
         schema:
           type: object
@@ -343,9 +344,9 @@ paths:
       - application/json
       description: Delete an employer by ID
       parameters:
-      - description: Employer ID
-        in: path
+      - in: path
         name: id
+        description: Employer ID
         required: true
         type: integer
       produces:
@@ -367,9 +368,9 @@ paths:
         "200":
           description: OK
           schema:
+            type: array
             items:
               $ref: '#/definitions/models.Supervisor'
-            type: array
       summary: Get all supervisors
       tags:
       - supervisors
@@ -378,9 +379,9 @@ paths:
       - application/json
       description: Create a new supervisor with the input payload
       parameters:
-      - description: Supervisor
-        in: body
+      - in: body
         name: supervisor
+        description: Supervisor
         required: true
         schema:
           $ref: '#/definitions/models.Supervisor'
@@ -400,9 +401,9 @@ paths:
       - application/json
       description: Get details of a supervisor by ID
       parameters:
-      - description: Supervisor ID
-        in: path
+      - in: path
         name: id
+        description: Supervisor ID
         required: true
         type: integer
       produces:
@@ -420,14 +421,14 @@ paths:
       - application/json
       description: Update details of a supervisor by ID
       parameters:
-      - description: Supervisor ID
-        in: path
+      - in: path
         name: id
+        description: Supervisor ID
         required: true
         type: integer
-      - description: Supervisor
-        in: body
+      - in: body
         name: supervisor
+        description: Supervisor
         required: true
         schema:
           $ref: '#/definitions/models.Supervisor'
@@ -446,9 +447,9 @@ paths:
       - application/json
       description: Delete a supervisor by ID
       parameters:
-      - description: Supervisor ID
-        in: path
+      - in: path
         name: id
+        description: Supervisor ID
         required: true
         type: integer
       produces:
@@ -459,4 +460,3 @@ paths:
       summary: Delete a supervisor by ID
       tags:
       - supervisors
-swagger: "2.0"
