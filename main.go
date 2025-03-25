@@ -8,9 +8,9 @@ import (
 	"server/models"
 	"server/routes"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
@@ -31,8 +31,11 @@ func main() {
 	// Register API routes
 	routes.RegisterStudentRoutes(r)
 
-	// Serve Swagger documentation
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	// Serve OpenAPI documentation
+	opts := middleware.SwaggerUIOpts{SpecURL: "/openapi.yaml"}
+	sh := middleware.SwaggerUI(opts, nil)
+	r.Handle("/docs", sh)
+	r.Handle("/openapi.yaml", http.FileServer(http.Dir("./server")))
 
 	// CORS Setup - Set allowed origins to Choreo API Gateway
 	corsMiddleware := handlers.CORS(
