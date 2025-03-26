@@ -3,7 +3,7 @@ schemaVersion: 1.1
 
 fileMounts:
   - name: aiven_pg_creds
-    path: /mnt/pg_creds
+    path: server/config
     sourcePath: server/config
 
 # +optional Incoming connection details for the component
