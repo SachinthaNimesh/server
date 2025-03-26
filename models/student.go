@@ -19,8 +19,8 @@ type Student struct {
 	EmployerID            int       `json:"employer_id"`
 	Remarks               string    `json:"remarks" gorm:"size:500"`
 	Photo                 []byte    `json:"photo"`
-	HomeLong              float64   `json:"home_long"`
-	HomeLat               float64   `json:"home_lat"`
+	HomeLong              float64   `json:"home_long" gorm:"default:0"`
+	HomeLat               float64   `json:"home_lat" gorm:"default:0"`
 }
 
 func (Student) TableName() string {

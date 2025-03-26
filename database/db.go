@@ -18,21 +18,23 @@ func ConnectDB() {
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslmode := os.Getenv("DB_SSLMODE") // Optional: Default to "disable" if not set
+	sslmode := os.Getenv("DB_SSLMODE")    // Optional: Default to "require" or "verify-ca"
+	sslrootcert := "/mnt/pg_creds/ca.pem" // Mounted certificate path
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
 		log.Fatal("❌ Database connection environment variables are not set properly")
 	}
 
-	// Define DSN connection string
+	// Define DSN connection string with SSL root certificate
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s sslrootcert=%s",
 		host,
 		user,
 		password,
 		dbname,
 		port,
 		sslmode,
+		sslrootcert,
 	)
 
 	log.Println("ℹ️ Attempting to connect to the database...")
