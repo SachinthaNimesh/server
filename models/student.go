@@ -8,7 +8,7 @@ type Student struct {
 	ID                    int       `json:"id" gorm:"primaryKey"`
 	FirstName             string    `json:"first_name" gorm:"size:100"`
 	LastName              string    `json:"last_name" gorm:"size:100"`
-	DOB                   time.Time `json:"dob"`
+	DOB                   time.Time `json:"dob" gorm:"type:date"`
 	Gender                string    `json:"gender" gorm:"size:10"`
 	AddressLine1          string    `json:"address_line1" gorm:"size:255"`
 	AddressLine2          string    `json:"address_line2" gorm:"size:255"`
