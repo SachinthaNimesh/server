@@ -19,9 +19,6 @@ func main() {
 		port = "8080"
 	}
 
-	// Path to CA certificate inside Choreo container
-	sslrootcert := "/mnt/pg_creds/ca.pem"
-
 	// Connect to DB with environment variables
 	database.ConnectDB()
 	database.DB.AutoMigrate(&models.Student{}, &models.Supervisor{}, &models.Mood{}, &models.Employer{}, &models.Attendance{})
