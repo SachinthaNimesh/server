@@ -18,7 +18,6 @@ func ConnectDB() {
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslmode := os.Getenv("DB_SSLMODE")    // Optional: Default to "require" or "verify-ca"
 	sslrootcert := "/mnt/pg_creds/ca.pem" // Mounted certificate path
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
@@ -27,13 +26,12 @@ func ConnectDB() {
 
 	// Define DSN connection string with SSL root certificate
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s sslrootcert=%s",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=verify-ca sslrootcert=%s",
 		host,
 		user,
 		password,
 		dbname,
 		port,
-		sslmode,
 		sslrootcert,
 	)
 
