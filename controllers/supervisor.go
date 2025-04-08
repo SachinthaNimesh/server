@@ -13,11 +13,11 @@ import (
 
 // GetSupervisors godoc
 // @Summary Get all supervisors
-// @Description Get details of all supervisors
+// @Description Get all supervisors
 // @Tags supervisors
-// @Accept  json
-// @Produce  json
+// @Produce json
 // @Success 200 {array} models.Supervisor
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /supervisors [get]
 func GetSupervisors(w http.ResponseWriter, r *http.Request) {
 	var supervisors []models.Supervisor
@@ -31,12 +31,13 @@ func GetSupervisors(w http.ResponseWriter, r *http.Request) {
 
 // GetSupervisor godoc
 // @Summary Get a supervisor by ID
-// @Description Get details of a supervisor by ID
+// @Description Get a supervisor by ID
 // @Tags supervisors
-// @Accept  json
-// @Produce  json
+// @Produce json
 // @Param id path int true "Supervisor ID"
 // @Success 200 {object} models.Supervisor
+// @Failure 400 {string} string "Invalid supervisor ID"
+// @Failure 404 {string} string "Supervisor not found"
 // @Router /supervisors/{id} [get]
 func GetSupervisor(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -57,12 +58,14 @@ func GetSupervisor(w http.ResponseWriter, r *http.Request) {
 
 // CreateSupervisor godoc
 // @Summary Create a new supervisor
-// @Description Create a new supervisor with the input payload
+// @Description Create a new supervisor
 // @Tags supervisors
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param supervisor body models.Supervisor true "Supervisor"
-// @Success 200 {object} models.Supervisor
+// @Success 201 {object} models.Supervisor
+// @Failure 400 {string} string "Bad request"
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /supervisors [post]
 func CreateSupervisor(w http.ResponseWriter, r *http.Request) {
 	var supervisor models.Supervisor
@@ -81,13 +84,16 @@ func CreateSupervisor(w http.ResponseWriter, r *http.Request) {
 
 // UpdateSupervisor godoc
 // @Summary Update a supervisor by ID
-// @Description Update details of a supervisor by ID
+// @Description Update a supervisor by ID
 // @Tags supervisors
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path int true "Supervisor ID"
 // @Param supervisor body models.Supervisor true "Supervisor"
 // @Success 200 {object} models.Supervisor
+// @Failure 400 {string} string "Invalid supervisor ID"
+// @Failure 404 {string} string "Supervisor not found"
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /supervisors/{id} [put]
 func UpdateSupervisor(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -120,10 +126,10 @@ func UpdateSupervisor(w http.ResponseWriter, r *http.Request) {
 // @Summary Delete a supervisor by ID
 // @Description Delete a supervisor by ID
 // @Tags supervisors
-// @Accept  json
-// @Produce  json
 // @Param id path int true "Supervisor ID"
-// @Success 204
+// @Success 204 {string} string "No Content"
+// @Failure 400 {string} string "Invalid supervisor ID"
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /supervisors/{id} [delete]
 func DeleteSupervisor(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)

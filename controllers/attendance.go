@@ -1,3 +1,4 @@
+// There is an issue in model and this controller
 package controllers
 
 import (
@@ -12,6 +13,19 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// PostAttendance handles the attendance check-in and check-out
+// @Summary Record attendance
+// @Description Record check-in or check-out for a student
+// @Tags attendance
+// @Accept json
+// @Produce json
+// @Param id path int true "Student ID"
+// @Param attendance body struct{CheckIn bool `json:"check_in"`; Latitude float64 `json:"check_in_lat"`; Longitude float64 `json:"check_in_long"`} true "Attendance data"
+// @Success 200 {object} models.Attendance
+// @Failure 400 {string} string "Invalid input"
+// @Failure 404 {string} string "Check-in record not found for today"
+// @Failure 500 {string} string "Internal server error"
+// @Router /attendance/{id} [post]
 func PostAttendance(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received attendance request")
 
@@ -43,8 +57,8 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 	var attendance models.Attendance
 	if requestData.CheckIn {
 		attendance.StudentID = studentID
-		attendance.CheckInLat = requestData.Latitude
-		attendance.CheckInLong = requestData.Longitude
+		attendance.CheckInLatitude = requestData.Latitude
+		attendance.CheckInLongitude = requestData.Longitude
 		attendance.CheckInDateTime = time.Now()
 
 		log.Println("Creating new check-in record")
@@ -62,8 +76,8 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		attendance.CheckOutLat = requestData.Latitude
-		attendance.CheckOutLong = requestData.Longitude
+		attendance.CheckOutLatitude = requestData.Latitude
+		attendance.CheckOutLongitude = requestData.Longitude
 		attendance.CheckOutDateTime = time.Now()
 
 		log.Println("Updating existing record with check-out data")

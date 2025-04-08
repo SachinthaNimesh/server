@@ -1,6 +1,5 @@
 package controllers
 
-//implement post method for mood saving
 import (
 	"encoding/json"
 	"log"
@@ -14,11 +13,11 @@ import (
 
 // GetMoods godoc
 // @Summary Get all moods
-// @Description Get details of all moods
+// @Description Get all moods
 // @Tags moods
-// @Accept  json
-// @Produce  json
+// @Produce json
 // @Success 200 {array} models.Mood
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /moods [get]
 func GetMoods(w http.ResponseWriter, r *http.Request) {
 	var moods []models.Mood
@@ -32,12 +31,12 @@ func GetMoods(w http.ResponseWriter, r *http.Request) {
 
 // GetMood godoc
 // @Summary Get a mood by ID
-// @Description Get details of a mood by ID
+// @Description Get a mood by ID
 // @Tags moods
-// @Accept  json
-// @Produce  json
+// @Produce json
 // @Param id path int true "Mood ID"
 // @Success 200 {object} models.Mood
+// @Failure 404 {string} string "Not Found"
 // @Router /moods/{id} [get]
 func GetMood(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -54,14 +53,15 @@ func GetMood(w http.ResponseWriter, r *http.Request) {
 
 // CreateMood godoc
 // @Summary Create a new mood
-// @Description Create a new mood with the input payload
+// @Description Create a new mood
 // @Tags moods
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param mood body models.Mood true "Mood"
-// @Success 200 {object} models.Mood
+// @Success 201 {object} models.Mood
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /moods [post]
-/* corrected CreateMood rest of the functions should follow this structure */
 func CreateMood(w http.ResponseWriter, r *http.Request) {
 	var mood models.Mood
 	if err := json.NewDecoder(r.Body).Decode(&mood); err != nil {
@@ -69,12 +69,11 @@ func CreateMood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the RecordedAt field to the current time
 	mood.RecordedAt = time.Now()
 
 	if err := database.DB.Create(&mood).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Printf("Error creating mood: %v", err) // Add this line
+		log.Printf("Error creating mood: %v", err)
 		return
 	}
 
@@ -84,13 +83,16 @@ func CreateMood(w http.ResponseWriter, r *http.Request) {
 
 // UpdateMood godoc
 // @Summary Update a mood by ID
-// @Description Update details of a mood by ID
+// @Description Update a mood by ID
 // @Tags moods
-// @Accept  json
-// @Produce  json
+// @Accept json
+// @Produce json
 // @Param id path int true "Mood ID"
 // @Param mood body models.Mood true "Mood"
 // @Success 200 {object} models.Mood
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Not Found"
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /moods/{id} [put]
 func UpdateMood(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -120,10 +122,9 @@ func UpdateMood(w http.ResponseWriter, r *http.Request) {
 // @Summary Delete a mood by ID
 // @Description Delete a mood by ID
 // @Tags moods
-// @Accept  json
-// @Produce  json
 // @Param id path int true "Mood ID"
-// @Success 204
+// @Success 204 {string} string "No Content"
+// @Failure 500 {string} string "Internal Server Error"
 // @Router /moods/{id} [delete]
 func DeleteMood(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
