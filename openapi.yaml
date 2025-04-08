@@ -127,6 +127,28 @@ paths:
       responses:
         '204':
           description: No Content
+  /students/detailed:
+    get:
+      summary: Get detailed student information
+      description: Returns students with their latest attendance and mood data
+      operationId: getDetailedStudents
+      tags:
+        - students
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentDetailedResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /supervisors:
     get:
       summary: Get all supervisors
@@ -399,3 +421,36 @@ components:
           type: string
         status:
           type: string
+    StudentDetailedResponse:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          format: int64
+          example: 12345
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        employer_name:
+          type: string
+          example: "Acme Corp"
+        check_in_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T08:30:00Z"
+        check_out_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T17:30:00Z"
+        emotion:
+          type: string
+          example: "happy"
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Failed to retrieve student data"
