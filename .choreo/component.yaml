@@ -12,7 +12,7 @@ endpoints:
     displayName: Student Management API
     # +required Service section has the user service endpoint details
     service:
-      basePath:/
+    
       port:8080
       # +optional Base path of the API that gets exposed via the endpoint.
       # This is mandatory if the endpoint type is set to REST or GraphQL.
