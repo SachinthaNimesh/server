@@ -36,4 +36,7 @@ func RegisterStudentRoutes(router *mux.Router) {
 	router.HandleFunc("/supervisors/{id}", controllers.UpdateSupervisor).Methods("PUT")
 	router.HandleFunc("/supervisors/{id}", controllers.DeleteSupervisor).Methods("DELETE")
 
+	// Add card routes
+	router.HandleFunc("/dashboard", controllers.GetStudentDetails).Methods("GET")
+	// router.HandleFunc("/dashboard/{id}", controllers.GetStudentDetailsByID).Methods("GET")
 }
