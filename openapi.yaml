@@ -330,6 +330,28 @@ paths:
       responses:
         '204':
           description: No Content
+  /dashboard:
+    get:
+      summary: Get student details for the dashboard
+      description: Returns detailed student information including employer, attendance, and mood data.
+      operationId: getStudentDetails
+      tags:
+        - dashboard
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentCard'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     Mood:
@@ -454,3 +476,31 @@ components:
         error:
           type: string
           example: "Failed to retrieve student data"
+    StudentCard:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          format: int64
+          example: 12345
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        employer_name:
+          type: string
+          nullable: true
+          example: "Acme Corp"
+        check_in_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T08:30:00Z"
+        check_out_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T17:30:00Z"
+        emotion:
+          type: string
+          example: "happy"
