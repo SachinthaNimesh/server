@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 	"net/http"
 	"server/database"
@@ -44,18 +45,23 @@ func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) 
 		StudentID int `json:"student_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Error decoding request body: %v", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	resp, err := s.GenerateOTP(req.StudentID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error generating OTP: %v", err)
+		http.Error(w, "Failed to generate OTP", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
 
 // HandleValidateOTP godoc
@@ -74,18 +80,23 @@ func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) 
 		OTPCode string `json:"otp_code"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Error decoding request body: %v", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	resp, err := s.ValidateOTP(req.OTPCode)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error validating OTP: %v", err)
+		http.Error(w, "Failed to validate OTP", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
 
 // HandleVerifyDeviceAuth godoc
@@ -105,18 +116,23 @@ func (s *AuthService) HandleVerifyDeviceAuth(w http.ResponseWriter, r *http.Requ
 		SecretCode string `json:"secret_code"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Error decoding request body: %v", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	isAuthorized, err := s.VerifyDeviceAuth(req.StudentID, req.SecretCode)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error verifying device authorization: %v", err)
+		http.Error(w, "Failed to verify device authorization", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]bool{"authorized": isAuthorized})
+	if err := json.NewEncoder(w).Encode(map[string]bool{"authorized": isAuthorized}); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
 
 // GenerateOTP creates a new OTP for a student
@@ -127,6 +143,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 		Where("id = ?", studentID). // Removed is_active check
 		Count(&count).Error
 	if err != nil {
+		log.Printf("Database error while checking student existence: %v", err)
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 	if count == 0 {
@@ -136,6 +153,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	// Generate a random 4-digit OTP
 	otp, err := s.generateRandomOTP(4)
 	if err != nil {
+		log.Printf("Error generating random OTP: %v", err)
 		return nil, fmt.Errorf("failed to generate OTP: %w", err)
 	}
 
@@ -147,6 +165,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 		Where("student_id = ? AND is_used = false", studentID).
 		Update("is_used", true).Error
 	if err != nil {
+		log.Printf("Error invalidating existing OTPs: %v", err)
 		return nil, fmt.Errorf("failed to invalidate existing OTPs: %w", err)
 	}
 
@@ -159,6 +178,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	}
 	err = s.db.Create(&newOTP).Error
 	if err != nil {
+		log.Printf("Error storing new OTP: %v", err)
 		return nil, fmt.Errorf("failed to store OTP: %w", err)
 	}
 
@@ -179,6 +199,7 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 			Message: "Invalid OTP",
 		}, nil
 	} else if err != nil {
+		log.Printf("Database error while fetching OTP: %v", err)
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
@@ -203,6 +224,7 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	// Generate a secret code for the device
 	secretCode, err := s.generateSecretCode()
 	if err != nil {
+		log.Printf("Error generating secret code: %v", err)
 		return nil, fmt.Errorf("failed to generate secret code: %w", err)
 	}
 
@@ -210,6 +232,7 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	otp.IsUsed = true
 	err = s.db.Save(&otp).Error
 	if err != nil {
+		log.Printf("Error marking OTP as used: %v", err)
 		return nil, fmt.Errorf("failed to mark OTP as used: %w", err)
 	}
 
@@ -220,6 +243,7 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	}
 	err = s.db.Create(&authDevice).Error
 	if err != nil {
+		log.Printf("Error storing device authorization: %v", err)
 		return nil, fmt.Errorf("failed to store device authorization: %w", err)
 	}
 
@@ -241,6 +265,7 @@ func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	} else if err != nil {
+		log.Printf("Database error while verifying device authorization: %v", err)
 		return false, fmt.Errorf("database error: %w", err)
 	}
 
