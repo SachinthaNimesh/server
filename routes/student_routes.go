@@ -36,4 +36,13 @@ func RegisterStudentRoutes(router *mux.Router) {
 	// Add card routes
 	router.HandleFunc("/dashboard", controllers.GetStudentDetails).Methods("GET")
 	// router.HandleFunc("/dashboard/{id}", controllers.GetStudentDetailsByID).Methods("GET")
+
+	// RegisterRoutes sets up the routes for the AuthService
+
+	// Initialize AuthService
+	authService := controllers.NewAuthService()
+
+	// Register AuthService routes
+	authService.RegisterRoutes(router)
+
 }

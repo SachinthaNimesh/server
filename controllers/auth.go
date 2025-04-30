@@ -3,13 +3,16 @@ package controllers
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
+	"net/http"
 	"server/database"
 	"server/models"
 	"time"
 
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +26,97 @@ func NewAuthService() *AuthService {
 	return &AuthService{
 		db: database.DB, // Use the GORM DB instance
 	}
+}
+
+// HandleGenerateOTP godoc
+// @Summary Generate OTP for a student
+// @Description Generate a new OTP for a student
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param request body struct { StudentID int `json:"student_id"` } true "Student ID"
+// @Success 200 {object} models.OTPResponse
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /generate-otp [post]
+func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		StudentID int `json:"student_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := s.GenerateOTP(req.StudentID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+// HandleValidateOTP godoc
+// @Summary Validate OTP
+// @Description Validate an OTP and generate a secret code
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param request body struct { OTPCode string `json:"otp_code"` } true "OTP Code"
+// @Success 200 {object} models.OTPValidationResponse
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /validate-otp [post]
+func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		OTPCode string `json:"otp_code"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := s.ValidateOTP(req.OTPCode)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+// HandleVerifyDeviceAuth godoc
+// @Summary Verify device authorization
+// @Description Verify if a device is authorized using student ID and secret code
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param request body struct { StudentID int `json:"student_id"` SecretCode string `json:"secret_code"` } true "Authorization details"
+// @Success 200 {object} map[string]bool
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /verify-device-auth [post]
+func (s *AuthService) HandleVerifyDeviceAuth(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		StudentID  int    `json:"student_id"`
+		SecretCode string `json:"secret_code"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	isAuthorized, err := s.VerifyDeviceAuth(req.StudentID, req.SecretCode)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{"authorized": isAuthorized})
 }
 
 // GenerateOTP creates a new OTP for a student
@@ -150,9 +244,14 @@ func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, 
 		return false, fmt.Errorf("database error: %w", err)
 	}
 
-	// Removed is_active logic
-
 	return true, nil
+}
+
+// RegisterRoutes registers the routes for AuthService
+func (s *AuthService) RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("/generate-otp", s.HandleGenerateOTP).Methods("POST")
+	router.HandleFunc("/validate-otp", s.HandleValidateOTP).Methods("POST")
+	router.HandleFunc("/verify-device-auth", s.HandleVerifyDeviceAuth).Methods("POST")
 }
 
 // Helper function to generate a random 4-digit OTP
