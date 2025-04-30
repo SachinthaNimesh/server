@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Employee Management API
-  description: API for managing employees and authentication
+  description: API for managing employees
   version: 1.0.0
 servers:
   - url: http://localhost:8080/api/v1
@@ -16,14 +16,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Mood'
+              $ref: "#/components/schemas/Mood"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Mood'
+                $ref: "#/components/schemas/Mood"
   /moods/{id}:
     get:
       summary: Get a mood by ID
@@ -36,26 +36,26 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Mood'
+                $ref: "#/components/schemas/Mood"
   /students:
     get:
       summary: Get all students
       tags:
         - students
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Student'
+                  $ref: "#/components/schemas/Student"
     post:
       summary: Create a new student
       tags:
@@ -65,14 +65,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Student'
+              $ref: "#/components/schemas/Student"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Student'
+                $ref: "#/components/schemas/Student"
   /students/{id}:
     get:
       summary: Get a student by ID
@@ -85,12 +85,12 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Student'
+                $ref: "#/components/schemas/Student"
     put:
       summary: Update a student by ID
       tags:
@@ -106,14 +106,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Student'
+              $ref: "#/components/schemas/Student"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Student'
+                $ref: "#/components/schemas/Student"
     delete:
       summary: Delete a student by ID
       tags:
@@ -125,7 +125,7 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        "204":
           description: No Content
   /students/detailed:
     get:
@@ -135,34 +135,34 @@ paths:
       tags:
         - students
       responses:
-        '200':
+        "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/StudentDetailedResponse'
-        '500':
+                  $ref: "#/components/schemas/StudentDetailedResponse"
+        "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /supervisors:
     get:
       summary: Get all supervisors
       tags:
         - supervisors
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Supervisor'
+                  $ref: "#/components/schemas/Supervisor"
     post:
       summary: Create a new supervisor
       tags:
@@ -172,14 +172,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Supervisor'
+              $ref: "#/components/schemas/Supervisor"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Supervisor'
+                $ref: "#/components/schemas/Supervisor"
   /supervisors/{id}:
     get:
       summary: Get a supervisor by ID
@@ -192,12 +192,12 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Supervisor'
+                $ref: "#/components/schemas/Supervisor"
     put:
       summary: Update a supervisor by ID
       tags:
@@ -213,14 +213,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Supervisor'
+              $ref: "#/components/schemas/Supervisor"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Supervisor'
+                $ref: "#/components/schemas/Supervisor"
     delete:
       summary: Delete a supervisor by ID
       tags:
@@ -232,7 +232,7 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        "204":
           description: No Content
   /attendance/{id}:
     post:
@@ -250,14 +250,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Attendance'
+              $ref: "#/components/schemas/Attendance"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Attendance'
+                $ref: "#/components/schemas/Attendance"
   /employers:
     post:
       summary: Create a new employer
@@ -268,14 +268,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Employer'
+              $ref: "#/components/schemas/Employer"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Employer'
+                $ref: "#/components/schemas/Employer"
   /employers/{id}:
     get:
       summary: Get an employer by ID
@@ -288,12 +288,12 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Employer'
+                $ref: "#/components/schemas/Employer"
     put:
       summary: Update an employer by ID
       tags:
@@ -309,14 +309,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Employer'
+              $ref: "#/components/schemas/Employer"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Employer'
+                $ref: "#/components/schemas/Employer"
     delete:
       summary: Delete an employer by ID
       tags:
@@ -328,7 +328,7 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
+        "204":
           description: No Content
   /dashboard:
     get:
@@ -338,20 +338,20 @@ paths:
       tags:
         - dashboard
       responses:
-        '200':
+        "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/StudentCard'
-        '500':
+                  $ref: "#/components/schemas/StudentCard"
+        "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
   /generate-otp:
     post:
       summary: Generate OTP for a student
@@ -644,9 +644,3 @@ components:
         message:
           type: string
           example: "Authentication successful"
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          type: string
-          example: "Invalid request payload"
