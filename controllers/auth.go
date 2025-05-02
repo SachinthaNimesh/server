@@ -194,17 +194,19 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	var otp models.OTP
 	err := s.db.Where("otp_code = ?", otpCode).First(&otp).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Printf("OTP not found for code: %s", otpCode) // Improved logging
 		return &models.OTPValidationResponse{
 			Success: false,
 			Message: "Invalid OTP",
 		}, nil
 	} else if err != nil {
-		log.Printf("Database error while fetching OTP: %v", err)
+		log.Printf("Database error while fetching OTP for code %s: %v", otpCode, err) // Improved logging
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
 	// Check if OTP is already used
 	if otp.IsUsed {
+		log.Printf("OTP already used for code: %s", otpCode) // Improved logging
 		return &models.OTPValidationResponse{
 			Success: false,
 			Message: "OTP has already been used",
@@ -213,9 +215,10 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 
 	// Check if OTP is expired
 	if time.Now().After(otp.ExpiresAt) {
+		log.Printf("OTP expired for code: %s", otpCode) // Improved logging
 		otp.IsUsed = true
 		if err := s.db.Save(&otp).Error; err != nil {
-			log.Printf("Error marking expired OTP as used: %v", err)
+			log.Printf("Error marking expired OTP as used for code %s: %v", otpCode, err) // Improved logging
 		}
 		return &models.OTPValidationResponse{
 			Success: false,
@@ -226,15 +229,14 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	// Generate a secret code for the device
 	secretCode, err := s.generateSecretCode()
 	if err != nil {
-		log.Printf("Error generating secret code: %v", err)
+		log.Printf("Error generating secret code for OTP code %s: %v", otpCode, err) // Improved logging
 		return nil, fmt.Errorf("failed to generate secret code: %w", err)
 	}
 
 	// Mark OTP as used
 	otp.IsUsed = true
 	if err := s.db.Save(&otp).Error; err != nil {
-		log.Printf("Error marking OTP as used: %v", err)
-		// Continue processing since marking as used is not critical for validation success
+		log.Printf("Error marking OTP as used for code %s: %v", otpCode, err) // Improved logging
 	}
 
 	// Store the secret code associated with the student_id
@@ -243,7 +245,7 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 		SecretCode: secretCode,
 	}
 	if err := s.db.Create(&authDevice).Error; err != nil {
-		log.Printf("Error storing device authorization: %v", err)
+		log.Printf("Error storing device authorization for student ID %d: %v", otp.StudentID, err) // Improved logging
 		return nil, fmt.Errorf("failed to store device authorization: %w", err)
 	}
 

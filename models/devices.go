@@ -10,7 +10,7 @@ type AuthorizedDevice struct {
 }
 
 func (AuthorizedDevice) TableName() string {
-	return "devices"
+	return "authorized_devices"
 }
 
 type AuthRequest struct {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/joho/godotenv" // Import godotenv
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -12,13 +13,20 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() {
+	// Load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("⚠️ Could not load .env file, relying on system environment variables")
+	}
+
 	// Fetching database credentials from environment variables
 	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslrootcert := "/server/config/ca.pem" // Mounted certificate path
+	sslrootcert := "/server/config/ca.pem"
+	// sslrootcert := "/Users/nimesh/server/config/ca.pem" // Mounted certificate path
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
 		log.Fatal("❌ Database connection environment variables are not set properly")
