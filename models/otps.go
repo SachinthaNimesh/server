@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // OTP represents an OTP code for authentication
@@ -43,10 +41,4 @@ type OTPValidationResponse struct {
 
 func (OTP) TableName() string {
 	return "otps"
-}
-
-func (otp *OTP) BeforeCreate(tx *gorm.DB) (err error) {
-	otp.CreatedAt = time.Now()
-	otp.ExpiresAt = otp.CreatedAt.Add(30 * time.Minute) // Set expiration to 30 minutes from creation
-	return
 }

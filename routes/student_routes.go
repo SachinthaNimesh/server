@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"net/http"
 	"server/controllers"
 
 	"github.com/gorilla/mux"
@@ -44,5 +45,7 @@ func RegisterStudentRoutes(router *mux.Router) {
 
 	// Register AuthService routes
 	authService.RegisterRoutes(router)
+
+	router.HandleFunc("/employees", controllers.GetEmployeeData).Methods(http.MethodGet)
 
 }
