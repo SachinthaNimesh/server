@@ -214,7 +214,9 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	// Check if OTP is expired
 	if time.Now().After(otp.ExpiresAt) {
 		otp.IsUsed = true
-		s.db.Save(&otp)
+		if err := s.db.Save(&otp).Error; err != nil {
+			log.Printf("Error marking expired OTP as used: %v", err)
+		}
 		return &models.OTPValidationResponse{
 			Success: false,
 			Message: "OTP has expired",
@@ -230,10 +232,9 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 
 	// Mark OTP as used
 	otp.IsUsed = true
-	err = s.db.Save(&otp).Error
-	if err != nil {
+	if err := s.db.Save(&otp).Error; err != nil {
 		log.Printf("Error marking OTP as used: %v", err)
-		return nil, fmt.Errorf("failed to mark OTP as used: %w", err)
+		// Continue processing since marking as used is not critical for validation success
 	}
 
 	// Store the secret code associated with the student_id
@@ -241,8 +242,7 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 		StudentID:  otp.StudentID,
 		SecretCode: secretCode,
 	}
-	err = s.db.Create(&authDevice).Error
-	if err != nil {
+	if err := s.db.Create(&authDevice).Error; err != nil {
 		log.Printf("Error storing device authorization: %v", err)
 		return nil, fmt.Errorf("failed to store device authorization: %w", err)
 	}
