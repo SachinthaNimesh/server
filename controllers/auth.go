@@ -161,7 +161,16 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 			OTPCode:   existingOTP.OTPCode,
 			ExpiresAt: existingOTP.ExpiresAt,
 		}, nil
-	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Mark expired OTPs as used
+		err = s.db.Model(&models.OTP{}).
+			Where("student_id = ? AND is_used = false AND expires_at <= ?", studentID, time.Now()).
+			Update("is_used", true).Error
+		if err != nil {
+			log.Printf("Error marking expired OTPs as used for student ID %d: %v", studentID, err)
+			return nil, fmt.Errorf("failed to update expired OTPs: %w", err)
+		}
+	} else {
 		log.Printf("Database error while checking existing OTP for student ID %d: %v", studentID, err)
 		return nil, fmt.Errorf("database error: %w", err)
 	}
