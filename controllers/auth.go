@@ -150,6 +150,22 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 		return nil, errors.New("student not found")
 	}
 
+	// Check if there's an existing unused OTP that hasn't expired
+	var existingOTP models.OTP
+	err = s.db.Where("student_id = ? AND is_used = false AND expires_at > ?", studentID, time.Now()).
+		First(&existingOTP).Error
+	if err == nil {
+		log.Printf("An unused OTP already exists for student ID %d", studentID)
+		return &models.OTPResponse{
+			StudentID: studentID,
+			OTPCode:   existingOTP.OTPCode,
+			ExpiresAt: existingOTP.ExpiresAt,
+		}, nil
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Printf("Database error while checking existing OTP for student ID %d: %v", studentID, err)
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+
 	// Generate a random 4-digit OTP
 	otp, err := s.generateRandomOTP(4)
 	if err != nil {
