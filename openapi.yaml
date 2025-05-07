@@ -468,7 +468,6 @@ paths:
     get:
       summary: Get employee data
       description: Fetch detailed employee data including student, employer, supervisor, and OTP information.
-      operationId: getEmployeeData
       tags:
         - employees
       responses:
