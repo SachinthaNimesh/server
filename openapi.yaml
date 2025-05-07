@@ -479,6 +479,18 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/EmployeeResponse"
+              example:
+                - student_id: 1
+                  student_name: "John Doe"
+                  student_contact: "1234567890"
+                  employer_id: 101
+                  employer_name: "Acme Corp"
+                  employer_contact: "9876543210"
+                  employer_address: "123 Main St, Suite 100, Springfield"
+                  supervisor_id: 201
+                  supervisor_name: "Jane Smith"
+                  latest_otp_code: "1234"
+                  expires_at: "2025-04-30T15:30:00Z"
         "500":
           description: Internal Server Error
           content:
