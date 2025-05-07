@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"net/http"
 	"server/controllers"
 
 	"github.com/gorilla/mux"
@@ -9,7 +8,7 @@ import (
 
 func RegisterStudentRoutes(router *mux.Router) {
 	router.HandleFunc("/students", controllers.GetStudents).Methods("GET")
-	router.HandleFunc("/students", controllers.CreateStudent).Methods("POST")
+	// router.HandleFunc("/students", controllers.CreateStudent).Methods("POST")
 	router.HandleFunc("/students/{id}", controllers.GetStudent).Methods("GET")
 	router.HandleFunc("/students/{id}", controllers.UpdateStudent).Methods("PUT")
 	router.HandleFunc("/students/{id}", controllers.DeleteStudent).Methods("DELETE")
@@ -36,7 +35,6 @@ func RegisterStudentRoutes(router *mux.Router) {
 
 	// Add card routes
 	router.HandleFunc("/dashboard", controllers.GetStudentDetails).Methods("GET")
-	// router.HandleFunc("/dashboard/{id}", controllers.GetStudentDetailsByID).Methods("GET")
 
 	// RegisterRoutes sets up the routes for the AuthService
 
@@ -46,6 +44,6 @@ func RegisterStudentRoutes(router *mux.Router) {
 	// Register AuthService routes
 	authService.RegisterRoutes(router)
 
-	router.HandleFunc("/employees", controllers.GetEmployeeData).Methods(http.MethodGet)
+	router.HandleFunc("/employees", controllers.GetEmployeeData).Methods("GET")
 
 }
