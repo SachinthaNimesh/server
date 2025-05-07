@@ -466,31 +466,18 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /employees:
     get:
-      summary: Get employee data
-      description: Fetch detailed employee data including student, employer, supervisor, and OTP information.
+      summary: Get all employees
       tags:
         - employees
       responses:
         "200":
-          description: Successful operation
+          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/EmployeeResponse"
-              example:
-                - student_id: 1
-                  student_name: "John Doe"
-                  student_contact: "1234567890"
-                  employer_id: 101
-                  employer_name: "Acme Corp"
-                  employer_contact: "9876543210"
-                  employer_address: "123 Main St, Suite 100, Springfield"
-                  supervisor_id: 201
-                  supervisor_name: "Jane Smith"
-                  latest_otp_code: "1234"
-                  expires_at: "2025-04-30T15:30:00Z"
+                  $ref: "#/components/schemas/Employee"
         "500":
           description: Internal Server Error
           content:
@@ -677,48 +664,45 @@ components:
         message:
           type: string
           example: "Authentication successful"
-    EmployeeResponse:
+    Employee:
       type: object
       properties:
         student_id:
           type: integer
-          example: 1
         student_name:
           type: string
-          example: "John Doe"
         student_contact:
           type: string
-          example: "1234567890"
         employer_id:
-          type: integer
-          nullable: true
-          example: 101
+          oneOf:
+            - type: integer
+            - type: "null"
         employer_name:
-          type: string
-          nullable: true
-          example: "Acme Corp"
+          oneOf:
+            - type: string
+            - type: "null"
         employer_contact:
-          type: string
-          nullable: true
-          example: "9876543210"
+          oneOf:
+            - type: string
+            - type: "null"
         employer_address:
-          type: string
-          nullable: true
-          example: "123 Main St, Suite 100, Springfield"
+          oneOf:
+            - type: string
+            - type: "null"
         supervisor_id:
-          type: integer
-          nullable: true
-          example: 201
+          oneOf:
+            - type: integer
+            - type: "null"
         supervisor_name:
-          type: string
-          nullable: true
-          example: "Jane Smith"
+          oneOf:
+            - type: string
+            - type: "null"
         latest_otp_code:
-          type: string
-          nullable: true
-          example: "1234"
+          oneOf:
+            - type: string
+            - type: "null"
         expires_at:
-          type: string
-          format: date-time
-          nullable: true
-          example: "2025-04-30T15:30:00Z"
+          oneOf:
+            - type: string
+              format: date-time
+            - type: "null"
