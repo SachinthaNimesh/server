@@ -464,6 +464,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /employees:
+    get:
+      summary: Get employee data
+      description: Fetch detailed employee data including student, employer, supervisor, and OTP information.
+      operationId: getEmployeeData
+      tags:
+        - employees
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmployeeResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     Mood:
@@ -644,3 +666,48 @@ components:
         message:
           type: string
           example: "Authentication successful"
+    EmployeeResponse:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          example: 1
+        student_name:
+          type: string
+          example: "John Doe"
+        student_contact:
+          type: string
+          example: "1234567890"
+        employer_id:
+          type: integer
+          nullable: true
+          example: 101
+        employer_name:
+          type: string
+          nullable: true
+          example: "Acme Corp"
+        employer_contact:
+          type: string
+          nullable: true
+          example: "9876543210"
+        employer_address:
+          type: string
+          nullable: true
+          example: "123 Main St, Suite 100, Springfield"
+        supervisor_id:
+          type: integer
+          nullable: true
+          example: 201
+        supervisor_name:
+          type: string
+          nullable: true
+          example: "Jane Smith"
+        latest_otp_code:
+          type: string
+          nullable: true
+          example: "1234"
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-04-30T15:30:00Z"
