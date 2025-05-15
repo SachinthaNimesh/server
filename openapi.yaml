@@ -506,7 +506,8 @@ paths:
                 address:
                   type: string
                 studentId:
-                  type: string
+                  type: number
+                  format: int64
       responses:
         "200":
           description: Location updated successfully
