@@ -30,6 +30,15 @@ func main() {
 	// Register API routes
 	routes.RegisterStudentRoutes(r)
 
+	// // Route to handle location updates
+	// r.HandleFunc("/location", controllers.HandleLocationUpdate).Methods("POST")
+
+	// // Route for WebSocket connections
+	// r.HandleFunc("/ws", controllers.HandleWebSocket)
+
+	// // Serve static files for the React web app
+	// r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web")))
+
 	// CORS Setup - Set allowed origins to Choreo API Gateway
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
