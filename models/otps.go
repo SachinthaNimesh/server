@@ -33,10 +33,9 @@ type OTPValidationRequest struct {
 
 // OTPValidationResponse is returned after successful OTP validation
 type OTPValidationResponse struct {
-	Success    bool   `json:"success"`
-	StudentID  int    `json:"student_id"`
-	SecretCode string `json:"secret_code,omitempty"`
-	Message    string `json:"message,omitempty"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Token   string `json:"token"`
 }
 
 func (OTP) TableName() string {

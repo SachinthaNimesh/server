@@ -1,5 +1,7 @@
 package controllers
 
+//remove additional endpoint //
+
 import (
 	"crypto/rand"
 	"encoding/hex"
@@ -9,10 +11,12 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+	"os"
 	"server/database"
 	"server/models"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
@@ -66,7 +70,7 @@ func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) 
 
 // HandleValidateOTP godoc
 // @Summary Validate OTP
-// @Description Validate an OTP and generate a secret code
+// @Description Validate an OTP and generate a JWT token
 // @Tags authentication
 // @Accept json
 // @Produce json
@@ -93,7 +97,10 @@ func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
+	w.Header().Set("Authorization", "Bearer "+resp.Token) // Include JWT in response header
+	if err := json.NewEncoder(w).Encode(map[string]string{
+		"message": resp.Message,
+	}); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
@@ -214,7 +221,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	}, nil
 }
 
-// ValidateOTP checks if an OTP is valid and returns student_id and a new secret code
+// ValidateOTP checks if an OTP is valid and returns a JWT token
 func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse, error) {
 	var otp models.OTP
 	err := s.db.Where("otp_code = ?", otpCode).First(&otp).Error
@@ -251,35 +258,35 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 		}, nil
 	}
 
-	// Generate a secret code for the device
-	secretCode, err := s.generateSecretCode()
+	// Generate a JWT token for the student
+	token, err := s.generateJWT(otp.StudentID)
 	if err != nil {
-		log.Printf("Error generating secret code for OTP code %s: %v", otpCode, err) // Improved logging
-		return nil, fmt.Errorf("failed to generate secret code: %w", err)
+		log.Printf("Error generating JWT for student ID %d: %v", otp.StudentID, err)
+		return nil, fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
 	// Mark OTP as used
 	otp.IsUsed = true
 	if err := s.db.Save(&otp).Error; err != nil {
-		log.Printf("Error marking OTP as used for code %s: %v", otpCode, err) // Improved logging
-	}
-
-	// Store the secret code associated with the student_id
-	authDevice := models.AuthorizedDevice{
-		StudentID:  otp.StudentID,
-		SecretCode: secretCode,
-	}
-	if err := s.db.Create(&authDevice).Error; err != nil {
-		log.Printf("Error storing device authorization for student ID %d: %v", otp.StudentID, err) // Improved logging
-		return nil, fmt.Errorf("failed to store device authorization: %w", err)
+		log.Printf("Error marking OTP as used for code %s: %v", otpCode, err)
 	}
 
 	return &models.OTPValidationResponse{
-		Success:    true,
-		StudentID:  otp.StudentID,
-		SecretCode: secretCode,
-		Message:    "Authentication successful",
+		Success: true,
+		Message: "Authentication successful",
+		Token:   token,
 	}, nil
+}
+
+// Helper function to generate a JWT token
+func (s *AuthService) generateJWT(studentID int) (string, error) {
+	claims := jwt.MapClaims{
+		"student_id": studentID,
+		"exp":        time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secret := os.Getenv("JWT_SECRET") // Ensure JWT_SECRET is set in the environment
+	return token.SignedString([]byte(secret))
 }
 
 // VerifyDeviceAuth verifies if a device is authorized using student_id and secret_code

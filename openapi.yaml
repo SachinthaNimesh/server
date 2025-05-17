@@ -708,15 +708,12 @@ components:
         success:
           type: boolean
           example: true
-        student_id:
-          type: integer
-          example: 1
-        secret_code:
-          type: string
-          example: "abcd1234"
         message:
           type: string
           example: "Authentication successful"
+        token:
+          type: string
+          example: "abcd1234"
     Employee:
       type: object
       properties:
