@@ -1,7 +1,5 @@
 package controllers
 
-//remove additional endpoint //
-
 import (
 	"crypto/rand"
 	"encoding/hex"
@@ -101,42 +99,6 @@ func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) 
 	if err := json.NewEncoder(w).Encode(map[string]string{
 		"message": resp.Message,
 	}); err != nil {
-		log.Printf("Error encoding response: %v", err)
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}
-}
-
-// HandleVerifyDeviceAuth godoc
-// @Summary Verify device authorization
-// @Description Verify if a device is authorized using student ID and secret code
-// @Tags authentication
-// @Accept json
-// @Produce json
-// @Param request body struct { StudentID int `json:"student_id"` SecretCode string `json:"secret_code"` } true "Authorization details"
-// @Success 200 {object} map[string]bool
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
-// @Router /verify-device-auth [post]
-func (s *AuthService) HandleVerifyDeviceAuth(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		StudentID  int    `json:"student_id"`
-		SecretCode string `json:"secret_code"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Printf("Error decoding request body: %v", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
-	}
-
-	isAuthorized, err := s.VerifyDeviceAuth(req.StudentID, req.SecretCode)
-	if err != nil {
-		log.Printf("Error verifying device authorization: %v", err)
-		http.Error(w, "Failed to verify device authorization", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(map[string]bool{"authorized": isAuthorized}); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
@@ -289,28 +251,10 @@ func (s *AuthService) generateJWT(studentID int) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-// VerifyDeviceAuth verifies if a device is authorized using student_id and secret_code
-func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, error) {
-	var authDevice models.AuthorizedDevice
-
-	// Check if the device exists
-	err := s.db.Where("student_id = ? AND secret_code = ?", studentID, secretCode).
-		First(&authDevice).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
-	} else if err != nil {
-		log.Printf("Database error while verifying device authorization: %v", err)
-		return false, fmt.Errorf("database error: %w", err)
-	}
-
-	return true, nil
-}
-
 // RegisterRoutes registers the routes for AuthService
 func (s *AuthService) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/generate-otp", s.HandleGenerateOTP).Methods("POST")
 	router.HandleFunc("/validate-otp", s.HandleValidateOTP).Methods("POST")
-	router.HandleFunc("/verify-device-auth", s.HandleVerifyDeviceAuth).Methods("POST")
 }
 
 // Helper function to generate a random 4-digit OTP
@@ -333,4 +277,26 @@ func (s *AuthService) generateSecretCode() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+// VerifyToken verifies the JWT token and returns the claims
+func (s *AuthService) VerifyToken(tokenString string) (jwt.MapClaims, error) {
+	// Parse the token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Ensure the signing method is HMAC
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		// Return the secret key
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract claims
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, errors.New("invalid token")
 }
