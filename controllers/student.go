@@ -44,13 +44,17 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 	// Extract and validate the JWT token
 	token := r.Header.Get("Authorization")
 	if token == "" {
+		log.Println("Authorization token is missing") // Log missing token
 		http.Error(w, "Authorization token is required", http.StatusUnauthorized)
 		return
 	}
 
+	log.Printf("Received Authorization token: %s", token) // Log received token
+
 	// Verify the token using the existing method
 	claims, err := NewAuthService().VerifyToken(token)
 	if err != nil {
+		log.Printf("Token verification failed: %v", err) // Log verification failure
 		http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 		return
 	}
