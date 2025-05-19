@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"      // Added for logging
-	"net/http" // Import for authentication
+	"log" // Added for logging
+	"net/http"
 	"server/database"
 	"server/models"
 
@@ -37,30 +37,9 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path string true "Student ID"
 // @Success 200 {object} models.Student
-// @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Not Found"
 // @Router /students/{id} [get]
 func GetStudent(w http.ResponseWriter, r *http.Request) {
-	// Extract and validate the JWT token
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		log.Println("Authorization token is missing") // Log missing token
-		http.Error(w, "Authorization token is required", http.StatusUnauthorized)
-		return
-	}
-
-	log.Printf("Received Authorization token: %s", token) // Log received token
-
-	// Verify the token using the existing method
-	claims, err := NewAuthService().VerifyToken(token)
-	if err != nil {
-		log.Printf("Token verification failed: %v", err) // Log verification failure
-		http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
-		return
-	}
-
-	log.Printf("Authorized request by user ID: %v", claims["student_id"]) // Log authorized user
-
 	vars := mux.Vars(r)
 	id := vars["id"]
 
