@@ -9,12 +9,10 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"os"
 	"server/database"
 	"server/models"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
@@ -68,7 +66,7 @@ func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) 
 
 // HandleValidateOTP godoc
 // @Summary Validate OTP
-// @Description Validate an OTP and generate a JWT token
+// @Description Validate an OTP and generate a secret code
 // @Tags authentication
 // @Accept json
 // @Produce json
@@ -95,10 +93,43 @@ func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Authorization", "Bearer "+resp.Token) // Include JWT in response header
-	if err := json.NewEncoder(w).Encode(map[string]string{
-		"message": resp.Message,
-	}); err != nil {
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+// HandleVerifyDeviceAuth godoc
+// @Summary Verify device authorization
+// @Description Verify if a device is authorized using student ID and secret code
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param request body struct { StudentID int `json:"student_id"` SecretCode string `json:"secret_code"` } true "Authorization details"
+// @Success 200 {object} map[string]bool
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /verify-device-auth [post]
+func (s *AuthService) HandleVerifyDeviceAuth(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		StudentID  int    `json:"student_id"`
+		SecretCode string `json:"secret_code"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Error decoding request body: %v", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	isAuthorized, err := s.VerifyDeviceAuth(req.StudentID, req.SecretCode)
+	if err != nil {
+		log.Printf("Error verifying device authorization: %v", err)
+		http.Error(w, "Failed to verify device authorization", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(map[string]bool{"authorized": isAuthorized}); err != nil {
 		log.Printf("Error encoding response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
@@ -183,7 +214,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	}, nil
 }
 
-// ValidateOTP checks if an OTP is valid and returns a JWT token
+// ValidateOTP checks if an OTP is valid and returns student_id and a new secret code
 func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse, error) {
 	var otp models.OTP
 	err := s.db.Where("otp_code = ?", otpCode).First(&otp).Error
@@ -220,41 +251,59 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 		}, nil
 	}
 
-	// Generate a JWT token for the student
-	token, err := s.generateJWT(otp.StudentID)
+	// Generate a secret code for the device
+	secretCode, err := s.generateSecretCode()
 	if err != nil {
-		log.Printf("Error generating JWT for student ID %d: %v", otp.StudentID, err)
-		return nil, fmt.Errorf("failed to generate JWT: %w", err)
+		log.Printf("Error generating secret code for OTP code %s: %v", otpCode, err) // Improved logging
+		return nil, fmt.Errorf("failed to generate secret code: %w", err)
 	}
 
 	// Mark OTP as used
 	otp.IsUsed = true
 	if err := s.db.Save(&otp).Error; err != nil {
-		log.Printf("Error marking OTP as used for code %s: %v", otpCode, err)
+		log.Printf("Error marking OTP as used for code %s: %v", otpCode, err) // Improved logging
+	}
+
+	// Store the secret code associated with the student_id
+	authDevice := models.AuthorizedDevice{
+		StudentID:  otp.StudentID,
+		SecretCode: secretCode,
+	}
+	if err := s.db.Create(&authDevice).Error; err != nil {
+		log.Printf("Error storing device authorization for student ID %d: %v", otp.StudentID, err) // Improved logging
+		return nil, fmt.Errorf("failed to store device authorization: %w", err)
 	}
 
 	return &models.OTPValidationResponse{
-		Success: true,
-		Message: "Authentication successful",
-		Token:   token,
+		Success:    true,
+		StudentID:  otp.StudentID,
+		SecretCode: secretCode,
+		Message:    "Authentication successful",
 	}, nil
 }
 
-// Helper function to generate a JWT token
-func (s *AuthService) generateJWT(studentID int) (string, error) {
-	claims := jwt.MapClaims{
-		"student_id": studentID,
-		"exp":        time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
+// VerifyDeviceAuth verifies if a device is authorized using student_id and secret_code
+func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, error) {
+	var authDevice models.AuthorizedDevice
+
+	// Check if the device exists
+	err := s.db.Where("student_id = ? AND secret_code = ?", studentID, secretCode).
+		First(&authDevice).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		log.Printf("Database error while verifying device authorization: %v", err)
+		return false, fmt.Errorf("database error: %w", err)
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secret := os.Getenv("JWT_SECRET") // Ensure JWT_SECRET is set in the environment
-	return token.SignedString([]byte(secret))
+
+	return true, nil
 }
 
 // RegisterRoutes registers the routes for AuthService
 func (s *AuthService) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/generate-otp", s.HandleGenerateOTP).Methods("POST")
 	router.HandleFunc("/validate-otp", s.HandleValidateOTP).Methods("POST")
+	router.HandleFunc("/verify-device-auth", s.HandleVerifyDeviceAuth).Methods("POST")
 }
 
 // Helper function to generate a random 4-digit OTP
@@ -277,26 +326,4 @@ func (s *AuthService) generateSecretCode() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
-}
-
-// VerifyToken verifies the JWT token and returns the claims
-func (s *AuthService) VerifyToken(tokenString string) (jwt.MapClaims, error) {
-	// Parse the token
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Ensure the signing method is HMAC
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		// Return the secret key
-		return []byte(os.Getenv("JWT_SECRET")), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Extract claims
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, nil
-	}
-	return nil, errors.New("invalid token")
 }
