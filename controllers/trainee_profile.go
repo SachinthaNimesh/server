@@ -63,7 +63,7 @@ func GetTraineeProfile(w http.ResponseWriter, r *http.Request) {
 		FROM student s
 		JOIN attendance a ON s.id = a.student_id
 		WHERE s.id = ?
-		ORDER BY a.check_in_date_time ASC
+		ORDER BY a.check_in_date_time DESC
 		LIMIT 5`
 
 	if err := database.DB.Raw(query, studentID).Scan(&recentAttendanceRecords).Error; err != nil {
