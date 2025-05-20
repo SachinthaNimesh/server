@@ -41,7 +41,7 @@ func main() {
 
 	// CORS Setup - Set allowed origins to Choreo API Gateway
 	corsMiddleware := handlers.CORS(
-		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization", "Student-ID"}), // Added "Student-ID"
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
 		handlers.AllowedOrigins([]string{"*"}), // Replace "*" with Choreo domain in production
 	)
