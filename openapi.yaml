@@ -45,17 +45,12 @@ paths:
           description: Bad Request
         "500":
           description: Internal Server Error
-  /moods:
     get:
-      summary: Get a mood by ID
+      summary: Get all moods
+      operationId: getAllMoods
       tags:
         - moods
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
         - name: Student-ID
           in: header
           required: true
@@ -68,10 +63,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Mood"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mood"
   /students:
     get:
       summary: Get all students
+      operationId: getAllStudents
       tags:
         - students
       parameters:
@@ -114,17 +112,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
-  /students:
+  /student:
     get:
       summary: Get a student by ID
       tags:
-        - students
+        - student
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
         - name: Student-ID
           in: header
           required: true
@@ -140,14 +133,10 @@ paths:
                 $ref: "#/components/schemas/Student"
     put:
       summary: Update a student by ID
+      operationId: updateStudentById
       tags:
         - students
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
         - name: Student-ID
           in: header
           required: true
@@ -169,14 +158,10 @@ paths:
                 $ref: "#/components/schemas/Student"
     delete:
       summary: Delete a student by ID
+      operationId: deleteStudentById
       tags:
         - students
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
         - name: Student-ID
           in: header
           required: true
