@@ -18,6 +18,7 @@ func RegisterStudentRoutes(router *mux.Router) {
 
 	// Add mood routes
 	router.HandleFunc("/moods", controllers.CreateMood).Methods("POST")
+	router.HandleFunc("/moods", controllers.GetMoods).Methods("GET")
 
 	// Add card routes
 	router.HandleFunc("/dashboard", controllers.GetStudentDetails).Methods("GET")
