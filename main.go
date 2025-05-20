@@ -27,25 +27,33 @@ func main() {
 	// Define router
 	router := mux.NewRouter()
 
-	// CORS Setup - Set allowed origins to Choreo API Gateway
+	// CORS Setup with proper configuration
 	corsMiddleware := handlers.CORS(
-		handlers.AllowedHeaders([]string{"Content-Type", "Authorization", "Student-ID"}), // Ensure "Student-ID" is included
+		handlers.AllowedHeaders([]string{
+			"Content-Type",
+			"Authorization",
+			"Student-ID",
+			"Access-Control-Allow-Headers",
+			"Access-Control-Allow-Origin",
+			"Origin",
+			"Accept",
+			"X-Requested-With",
+		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"https://87abc270-1269-4d98-8dad-e53781a1ae52.e1-us-east-azure.choreoapps.dev"}), // Replace "*" with the actual origin in production
+		handlers.AllowedOrigins([]string{"https://87abc270-1269-4d98-8dad-e53781a1ae52.e1-us-east-azure.choreoapps.dev"}),
+		handlers.AllowCredentials(),
+		handlers.ExposedHeaders([]string{"Content-Length"}),
+		handlers.MaxAge(86400), // 24 hours
 	)
 	router.Use(corsMiddleware)
 
+	// Add OPTIONS handler for preflight requests
+	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	// Register API routes
 	routes.RegisterStudentRoutes(router)
-
-	// // Route to handle location updates
-	// r.HandleFunc("/location", controllers.HandleLocationUpdate).Methods("POST")
-
-	// // Route for WebSocket connections
-	// r.HandleFunc("/ws", controllers.HandleWebSocket)
-
-	// // Serve static files for the React web app
-	// r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web")))
 
 	// Start the server
 	log.Println("Server started on port", port)
