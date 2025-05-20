@@ -2,13 +2,26 @@ package controllers
 
 import (
 	"encoding/json"
-	"log" // Added for logging
+	"log"
 	"net/http"
 	"server/database"
 	"server/models"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
+
+func getStudentIDFromHeader(r *http.Request) (int, error) {
+	StudentIDHeader := r.Header.Get("Student-ID")
+	if StudentIDHeader == "" {
+		return 0, http.ErrMissingFile
+	}
+	studentID, err := strconv.Atoi(StudentIDHeader)
+	if err != nil {
+		return 0, err
+	}
+	return studentID, nil
+}
 
 // GetStudents godoc
 // @Summary Get all students
@@ -40,16 +53,20 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Not Found"
 // @Router /students/{id} [get]
 func GetStudent(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+	studentID, err := getStudentIDFromHeader(r)
+	if err != nil {
+		log.Printf("Error extracting Student-ID: %v", err)
+		http.Error(w, "Invalid or missing Student-ID header", http.StatusBadRequest)
+		return
+	}
 
 	var student models.Student
-	if err := database.DB.First(&student, id).Error; err != nil {
-		log.Printf("Error fetching student with ID %s: %v", id, err) // Log error
+	if err := database.DB.First(&student, studentID).Error; err != nil {
+		log.Printf("Error fetching student with ID %d: %v", studentID, err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	log.Printf("Fetched student with ID %s: %+v", id, student) // Log success
+	log.Printf("Fetched student with ID %d: %+v", studentID, student) // Log success
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(student)
 }

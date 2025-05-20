@@ -63,12 +63,20 @@ func GetMood(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /moods [post]
 func CreateMood(w http.ResponseWriter, r *http.Request) {
+	studentID, err := getStudentIDFromHeader(r)
+	if err != nil {
+		log.Printf("Error extracting Student-ID: %v", err)
+		http.Error(w, "Invalid or missing Student-ID header", http.StatusBadRequest)
+		return
+	}
+
 	var mood models.Mood
 	if err := json.NewDecoder(r.Body).Decode(&mood); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	mood.StudentID = studentID
 	mood.RecordedAt = time.Now()
 
 	if err := database.DB.Create(&mood).Error; err != nil {

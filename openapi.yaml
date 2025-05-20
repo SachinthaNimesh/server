@@ -17,6 +17,13 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Mood"
+      parameters:
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -24,7 +31,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Mood"
-  /moods/{id}:
+  /moods:
     get:
       summary: Get a mood by ID
       tags:
@@ -35,6 +42,12 @@ paths:
           required: true
           schema:
             type: integer
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -47,6 +60,13 @@ paths:
       summary: Get all students
       tags:
         - students
+      parameters:
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -66,6 +86,13 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Student"
+      parameters:
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       responses:
         "201":
           description: Created
@@ -73,7 +100,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
-  /students/{id}:
+  /students:
     get:
       summary: Get a student by ID
       tags:
@@ -84,6 +111,12 @@ paths:
           required: true
           schema:
             type: integer
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -101,6 +134,12 @@ paths:
           required: true
           schema:
             type: integer
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       requestBody:
         required: true
         content:
@@ -124,6 +163,12 @@ paths:
           required: true
           schema:
             type: integer
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       responses:
         "204":
           description: No Content
