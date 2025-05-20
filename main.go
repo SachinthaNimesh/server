@@ -32,17 +32,23 @@ func main() {
 		handlers.AllowedHeaders([]string{
 			"Content-Type",
 			"Authorization",
-			"student-id",
+
 			"Access-Control-Allow-Headers",
 			"Access-Control-Allow-Origin",
 			"Origin",
 			"Accept",
 			"X-Requested-With",
+			"Test-Key",
+			"student-id", // Ensure this header is explicitly allowed
 		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
 		handlers.AllowedOrigins([]string{"https://87abc270-1269-4d98-8dad-e53781a1ae52.e1-us-east-azure.choreoapps.dev"}),
 		handlers.AllowCredentials(),
-		handlers.ExposedHeaders([]string{"Content-Length"}),
+		handlers.ExposedHeaders([]string{
+			"Content-Length",
+			"Access-Control-Allow-Headers", // Add this header to exposed headers
+			"student-id",                   // Ensure this header is explicitly exposed
+		}),
 		handlers.MaxAge(86400), // 24 hours
 	)
 	router.Use(corsMiddleware)
