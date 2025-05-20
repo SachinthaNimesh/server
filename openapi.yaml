@@ -149,187 +149,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /supervisors:
-    get:
-      summary: Get all supervisors
-      tags:
-        - supervisors
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Supervisor"
-    post:
-      summary: Create a new supervisor
-      tags:
-        - supervisors
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Supervisor"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Supervisor"
-  /supervisors/{id}:
-    get:
-      summary: Get a supervisor by ID
-      tags:
-        - supervisors
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Supervisor"
-    put:
-      summary: Update a supervisor by ID
-      tags:
-        - supervisors
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Supervisor"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Supervisor"
-    delete:
-      summary: Delete a supervisor by ID
-      tags:
-        - supervisors
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "204":
-          description: No Content
-  /attendance/{id}:
-    post:
-      summary: Create a new attendance record
-      tags:
-        - attendance
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Attendance"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Attendance"
-  /employers:
-    post:
-      summary: Create a new employer
-      tags:
-        - employers
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Employer"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Employer"
-  /employers/{id}:
-    get:
-      summary: Get an employer by ID
-      tags:
-        - employers
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Employer"
-    put:
-      summary: Update an employer by ID
-      tags:
-        - employers
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Employer"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Employer"
-    delete:
-      summary: Delete an employer by ID
-      tags:
-        - employers
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "204":
-          description: No Content
   /dashboard:
     get:
       summary: Get student details for the dashboard
@@ -537,6 +356,68 @@ paths:
           description: Switching Protocols
         "400":
           description: Bad Request
+  /attendance:
+    post:
+      summary: Create or update attendance record
+      description: Handles check-in and check-out attendance records for students.
+      tags:
+        - attendance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                check_in:
+                  type: boolean
+                  description: Indicates if this is a check-in or check-out.
+                check_in_lat:
+                  type: number
+                  format: float
+                  description: Latitude for check-in.
+                check_in_long:
+                  type: number
+                  format: float
+                  description: Longitude for check-in.
+      parameters:
+        - name: Student-ID
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student.
+        - name: Choreo-API-Key
+          in: header
+          required: true
+          schema:
+            type: string
+          description: API key for authentication.
+      responses:
+        "200":
+          description: Attendance record created or updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendance"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Check-in record not found for today
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     Mood:
@@ -591,32 +472,6 @@ components:
         home_lat:
           type: number
           format: float
-    Supervisor:
-      type: object
-      properties:
-        contact_number:
-          type: string
-        email_address:
-          type: string
-        first_name:
-          type: string
-        last_name:
-          type: string
-        student_id:
-          type: integer
-        supervisor_id:
-          type: integer
-    Employer:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        address:
-          type: string
-        contact_number:
-          type: string
     Attendance:
       type: object
       properties:
