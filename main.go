@@ -32,9 +32,6 @@ func main() {
 		handlers.AllowedHeaders([]string{
 			"Content-Type",
 			"Authorization",
-
-			"Access-Control-Allow-Headers",
-			"Access-Control-Allow-Origin",
 			"Origin",
 			"Accept",
 			"X-Requested-With",
@@ -46,17 +43,15 @@ func main() {
 		handlers.AllowCredentials(),
 		handlers.ExposedHeaders([]string{
 			"Content-Length",
-			"Access-Control-Allow-Headers", // Add this header to exposed headers
-			"student-id",                   // Ensure this header is explicitly exposed
 		}),
 		handlers.MaxAge(86400), // 24 hours
 	)
 	router.Use(corsMiddleware)
 
-	// Add OPTIONS handler for preflight requests
-	router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
+	// // Add OPTIONS handler for preflight requests
+	// router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// 	w.WriteHeader(http.StatusOK)
+	// })
 
 	// Register API routes
 	routes.RegisterStudentRoutes(router)
