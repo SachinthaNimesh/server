@@ -32,7 +32,7 @@ func main() {
 		handlers.AllowedHeaders([]string{
 			"Content-Type",
 			"Authorization",
-			"Student-ID",
+			"student-id",
 			"Access-Control-Allow-Headers",
 			"Access-Control-Allow-Origin",
 			"Origin",

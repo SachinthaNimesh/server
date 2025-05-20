@@ -40,17 +40,17 @@ func GetMoods(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Not Found"
 // @Router /moods/{id} [get]
 func GetMood(w http.ResponseWriter, r *http.Request) {
-	StudentIDHeader := r.Header.Get("Student-ID")
+	StudentIDHeader := r.Header.Get("student-id")
 	if StudentIDHeader == "" {
-		log.Println("Missing Student-ID header")
-		http.Error(w, "Missing Student-ID header", http.StatusBadRequest)
+		log.Println("Missing student-id header")
+		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
 
 	studentID, err := strconv.Atoi(StudentIDHeader)
 	if err != nil {
-		log.Printf("Invalid Student-ID header: %v", err)
-		http.Error(w, "Invalid Student-ID header", http.StatusBadRequest)
+		log.Printf("Invalid student-id header: %v", err)
+		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
 		return
 	}
 
@@ -78,17 +78,17 @@ func GetMood(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /moods [post]
 func CreateMood(w http.ResponseWriter, r *http.Request) {
-	StudentIDHeader := r.Header.Get("Student-ID")
+	StudentIDHeader := r.Header.Get("student-id")
 	if StudentIDHeader == "" {
-		log.Println("Missing Student-ID header")
-		http.Error(w, "Missing Student-ID header", http.StatusBadRequest)
+		log.Println("Missing student-id header")
+		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
 
 	studentID, err := strconv.Atoi(StudentIDHeader)
 	if err != nil {
-		log.Printf("Invalid Student-ID header: %v", err)
-		http.Error(w, "Invalid Student-ID header", http.StatusBadRequest)
+		log.Printf("Invalid student-id header: %v", err)
+		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
 		return
 	}
 

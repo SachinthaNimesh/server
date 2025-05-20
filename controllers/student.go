@@ -12,7 +12,7 @@ import (
 )
 
 func getStudentIDFromHeader(r *http.Request) (int, error) {
-	StudentIDHeader := r.Header.Get("Student-ID")
+	StudentIDHeader := r.Header.Get("student-id")
 	if StudentIDHeader == "" {
 		return 0, http.ErrMissingFile
 	}
@@ -55,8 +55,8 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 func GetStudent(w http.ResponseWriter, r *http.Request) {
 	studentID, err := getStudentIDFromHeader(r)
 	if err != nil {
-		log.Printf("Error extracting Student-ID: %v", err)
-		http.Error(w, "Invalid or missing Student-ID header", http.StatusBadRequest)
+		log.Printf("Error extracting student-id: %v", err)
+		http.Error(w, "Invalid or missing student-id header", http.StatusBadRequest)
 		return
 	}
 

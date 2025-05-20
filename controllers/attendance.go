@@ -13,17 +13,17 @@ import (
 func PostAttendance(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received attendance request")
 
-	StudentIDHeader := r.Header.Get("Student-ID")
+	StudentIDHeader := r.Header.Get("student-id")
 	if StudentIDHeader == "" {
-		log.Println("Missing Student-ID header")
-		http.Error(w, "Missing Student-ID header", http.StatusBadRequest)
+		log.Println("Missing student-id header")
+		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
 
 	studentID, err := strconv.Atoi(StudentIDHeader)
 	if err != nil {
-		log.Printf("Invalid student-ID header: %v", err)
-		http.Error(w, "Invalid student-ID header", http.StatusBadRequest)
+		log.Printf("Invalid student-id header: %v", err)
+		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
 		return
 	}
 
