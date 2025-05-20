@@ -27,7 +27,7 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	choreoAPIKey := r.Header.Get("Choreo-API_Key")
+	choreoAPIKey := r.Header.Get("Choreo-API-Key")
 	if choreoAPIKey == "" {
 		log.Println("Missing Choreo-API_Key header")
 		http.Error(w, "Missing Choreo-API_Key header", http.StatusBadRequest)
