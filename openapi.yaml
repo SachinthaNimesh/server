@@ -387,12 +387,6 @@ paths:
           schema:
             type: integer
           description: The ID of the student.
-        - name: Choreo-API-Key
-          in: header
-          required: true
-          schema:
-            type: string
-          description: API key for authentication.
       responses:
         "200":
           description: Attendance record created or updated successfully.
