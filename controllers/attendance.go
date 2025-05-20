@@ -27,12 +27,6 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	choreoAPIKey := r.Header.Get("Choreo-API-Key")
-	if choreoAPIKey == "" {
-		log.Println("Missing Choreo-API_Key header")
-		http.Error(w, "Missing Choreo-API_Key header", http.StatusBadRequest)
-		return
-	}
 	log.Printf("Processing attendance for student ID: %d", studentID)
 
 	var requestData struct {
