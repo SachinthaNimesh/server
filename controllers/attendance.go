@@ -8,21 +8,31 @@ import (
 	"server/models"
 	"strconv"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 func PostAttendance(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received attendance request")
 
-	vars := mux.Vars(r)
-	studentID, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		log.Printf("Invalid student ID: %v", err)
-		http.Error(w, "Invalid student ID", http.StatusBadRequest)
+	StudentIDHeader := r.Header.Get("Student-ID")
+	if StudentIDHeader == "" {
+		log.Println("Missing Student-ID header")
+		http.Error(w, "Missing Student-ID header", http.StatusBadRequest)
 		return
 	}
 
+	studentID, err := strconv.Atoi(StudentIDHeader)
+	if err != nil {
+		log.Printf("Invalid student-ID header: %v", err)
+		http.Error(w, "Invalid student-ID header", http.StatusBadRequest)
+		return
+	}
+
+	choreoAPIKey := r.Header.Get("Choreo-API_Key")
+	if choreoAPIKey == "" {
+		log.Println("Missing Choreo-API_Key header")
+		http.Error(w, "Missing Choreo-API_Key header", http.StatusBadRequest)
+		return
+	}
 	log.Printf("Processing attendance for student ID: %d", studentID)
 
 	var requestData struct {

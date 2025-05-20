@@ -14,7 +14,7 @@ func RegisterStudentRoutes(router *mux.Router) {
 	router.HandleFunc("/students/{id}", controllers.DeleteStudent).Methods("DELETE")
 
 	// Add attendance routes
-	router.HandleFunc("/attendance/{id}", controllers.PostAttendance).Methods("POST")
+	router.HandleFunc("/attendance", controllers.PostAttendance).Methods("POST")
 
 	// Add mood routes
 	router.HandleFunc("/moods/{id}", controllers.GetMood).Methods("GET")
