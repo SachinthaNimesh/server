@@ -39,7 +39,7 @@ func main() {
 			"student-id", // Ensure this header is explicitly allowed
 		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"https://87abc270-1269-4d98-8dad-e53781a1ae52.e1-us-east-azure.choreoapps.dev"}),
+		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowCredentials(),
 		handlers.ExposedHeaders([]string{
 			"Content-Length",
@@ -47,11 +47,6 @@ func main() {
 		handlers.MaxAge(86400), // 24 hours
 	)
 	router.Use(corsMiddleware)
-
-	// // Add OPTIONS handler for preflight requests
-	// router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 	w.WriteHeader(http.StatusOK)
-	// })
 
 	// Register API routes
 	routes.RegisterStudentRoutes(router)
