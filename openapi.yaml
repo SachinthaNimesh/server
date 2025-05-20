@@ -6,7 +6,7 @@ info:
 servers:
   - url: http://localhost:8080/api/v1
 paths:
-  /moods:
+  /post-mood:
     post:
       summary: Create a new mood
       tags:
@@ -16,17 +16,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                emotion:
-                  type: string
-                  description: The emotion of the mood
-                is_daily:
-                  type: boolean
-                  description: Indicates if this is a daily mood
-              required:
-                - emotion
-                - is_daily
+              $ref: "#/components/schemas/Mood"
       parameters:
         - name: Student-ID
           in: header
@@ -35,19 +25,15 @@ paths:
             type: integer
           description: The ID of the student
       responses:
-        "201":
-          description: Mood created successfully
+        "200":
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Mood"
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
+  /get-mood:
     get:
-      summary: Get all moods
-      operationId: getAllMoods
+      summary: Get a mood by ID
       tags:
         - moods
       parameters:
@@ -63,13 +49,10 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Mood"
-  /students:
+                $ref: "#/components/schemas/Mood"
+  /get-students:
     get:
       summary: Get all students
-      operationId: getAllStudents
       tags:
         - students
       parameters:
@@ -88,6 +71,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Student"
+  /post-student:
     post:
       summary: Create a new student
       tags:
@@ -112,11 +96,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
-  /student:
+  /get-student:
     get:
       summary: Get a student by ID
       tags:
-        - student
+        - students
       parameters:
         - name: Student-ID
           in: header
@@ -131,9 +115,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
+  /update-student:
     put:
       summary: Update a student by ID
-      operationId: updateStudentById
       tags:
         - students
       parameters:
@@ -156,9 +140,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
+  /delete-student:
     delete:
       summary: Delete a student by ID
-      operationId: deleteStudentById
       tags:
         - students
       parameters:
