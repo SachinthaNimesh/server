@@ -16,7 +16,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Mood"
+              type: object
+              properties:
+                emotion:
+                  type: string
+                  description: The emotion of the mood
+                is_daily:
+                  type: boolean
+                  description: Indicates if this is a daily mood
+              required:
+                - emotion
+                - is_daily
       parameters:
         - name: Student-ID
           in: header
@@ -25,12 +35,16 @@ paths:
             type: integer
           description: The ID of the student
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Mood created successfully
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Mood"
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
   /moods:
     get:
       summary: Get a mood by ID

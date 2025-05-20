@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"server/database"
 	"server/models"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -39,11 +40,25 @@ func GetMoods(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Not Found"
 // @Router /moods/{id} [get]
 func GetMood(w http.ResponseWriter, r *http.Request) {
+	StudentIDHeader := r.Header.Get("Student-ID")
+	if StudentIDHeader == "" {
+		log.Println("Missing Student-ID header")
+		http.Error(w, "Missing Student-ID header", http.StatusBadRequest)
+		return
+	}
+
+	studentID, err := strconv.Atoi(StudentIDHeader)
+	if err != nil {
+		log.Printf("Invalid Student-ID header: %v", err)
+		http.Error(w, "Invalid Student-ID header", http.StatusBadRequest)
+		return
+	}
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	var mood models.Mood
-	if err := database.DB.First(&mood, id).Error; err != nil {
+	if err := database.DB.Where("id = ? AND student_id = ?", id, studentID).First(&mood).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -63,21 +78,35 @@ func GetMood(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /moods [post]
 func CreateMood(w http.ResponseWriter, r *http.Request) {
-	studentID, err := getStudentIDFromHeader(r)
-	if err != nil {
-		log.Printf("Error extracting Student-ID: %v", err)
-		http.Error(w, "Invalid or missing Student-ID header", http.StatusBadRequest)
+	StudentIDHeader := r.Header.Get("Student-ID")
+	if StudentIDHeader == "" {
+		log.Println("Missing Student-ID header")
+		http.Error(w, "Missing Student-ID header", http.StatusBadRequest)
 		return
 	}
 
-	var mood models.Mood
-	if err := json.NewDecoder(r.Body).Decode(&mood); err != nil {
+	studentID, err := strconv.Atoi(StudentIDHeader)
+	if err != nil {
+		log.Printf("Invalid Student-ID header: %v", err)
+		http.Error(w, "Invalid Student-ID header", http.StatusBadRequest)
+		return
+	}
+
+	var payload struct {
+		Emotion string `json:"emotion"`
+		IsDaily bool   `json:"is_daily"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	mood.StudentID = studentID
-	mood.RecordedAt = time.Now()
+	mood := models.Mood{
+		StudentID:  studentID,
+		Emotion:    payload.Emotion,
+		IsDaily:    payload.IsDaily,
+		RecordedAt: time.Now(),
+	}
 
 	if err := database.DB.Create(&mood).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -87,61 +116,4 @@ func CreateMood(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(mood)
-}
-
-// UpdateMood godoc
-// @Summary Update a mood by ID
-// @Description Update a mood by ID
-// @Tags moods
-// @Accept json
-// @Produce json
-// @Param id path int true "Mood ID"
-// @Param mood body models.Mood true "Mood"
-// @Success 200 {object} models.Mood
-// @Failure 400 {string} string "Bad Request"
-// @Failure 404 {string} string "Not Found"
-// @Failure 500 {string} string "Internal Server Error"
-// @Router /moods/{id} [put]
-func UpdateMood(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	var mood models.Mood
-	if err := database.DB.First(&mood, id).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&mood); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err := database.DB.Save(&mood).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(mood)
-}
-
-// DeleteMood godoc
-// @Summary Delete a mood by ID
-// @Description Delete a mood by ID
-// @Tags moods
-// @Param id path int true "Mood ID"
-// @Success 204 {string} string "No Content"
-// @Failure 500 {string} string "Internal Server Error"
-// @Router /moods/{id} [delete]
-func DeleteMood(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	if err := database.DB.Delete(&models.Mood{}, id).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
 }
