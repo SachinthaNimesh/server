@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"server/database"
 	"server/models"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -42,21 +41,16 @@ func NewAuthService() *AuthService {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /generate-otp [post]
 func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) {
-	StudentIDHeader := r.Header.Get("student-id")
-	if StudentIDHeader == "" {
-		log.Println("Missing student-id header")
-		http.Error(w, "Missing student-id header", http.StatusBadRequest)
+	var req struct {
+		StudentID int `json:"student_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Error decoding request body: %v", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	studentID, err := strconv.Atoi(StudentIDHeader)
-	if err != nil {
-		log.Printf("Invalid student-id header: %v", err)
-		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
-		return
-	}
-
-	resp, err := s.GenerateOTP(studentID)
+	resp, err := s.GenerateOTP(req.StudentID)
 	if err != nil {
 		log.Printf("Error generating OTP: %v", err)
 		http.Error(w, "Failed to generate OTP", http.StatusInternalServerError)
