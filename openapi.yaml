@@ -205,16 +205,14 @@ paths:
       description: Generate a new OTP for a student
       tags:
         - authentication
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                student_id:
-                  type: integer
-                  example: 1
+      parameters:
+        - name: student-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
+      
       responses:
         "200":
           description: OTP generated successfully
@@ -331,48 +329,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /location:
-    post:
-      summary: Update location
-      description: Updates the location data for a student.
-      tags:
-        - location
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                longitude:
-                  type: number
-                  format: float
-                latitude:
-                  type: number
-                  format: float
-                address:
-                  type: string
-                studentId:
-                  type: number
-                  format: int64
-      responses:
-        "200":
-          description: Location updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Location data received"
-        "400":
-          description: Invalid request body
-        "401":
-          description: Unauthorized
   /ws:
     get:
       summary: WebSocket connection for real-time updates
