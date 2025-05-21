@@ -48,10 +48,11 @@ func GetStudents(w http.ResponseWriter, r *http.Request) {
 // @Description Get a student by ID
 // @Tags students
 // @Produce json
-// @Param id path string true "Student ID"
+// @Param student-id header string true "Student ID"
 // @Success 200 {object} models.Student
+// @Failure 400 {string} string "Bad Request"
 // @Failure 404 {string} string "Not Found"
-// @Router /students/{id} [get]
+// @Router /get-student [get]
 func GetStudent(w http.ResponseWriter, r *http.Request) {
 	studentID, err := getStudentIDFromHeader(r)
 	if err != nil {

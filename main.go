@@ -36,6 +36,7 @@ func main() {
 			"Accept",
 			"X-Requested-With",
 			"Test-Key",
+			"testkey",
 			"student-id", // Ensure this header is explicitly allowed
 		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
