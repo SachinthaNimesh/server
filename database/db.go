@@ -23,6 +23,10 @@ func ConnectDB() {
 	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
+
+	// Set the timezone for the database connection
+	timezone := "Asia/Kolkata"
+	os.Setenv("PGTZ", timezone)
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
 	sslrootcert := "/server/config/ca.pem"
