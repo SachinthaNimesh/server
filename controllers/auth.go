@@ -13,6 +13,7 @@ import (
 	"server/models"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
@@ -301,9 +302,30 @@ func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, 
 
 // RegisterRoutes registers the routes for AuthService
 func (s *AuthService) RegisterRoutes(router *mux.Router) {
+	// CORS Setup for AuthService routes
+	corsMiddleware := handlers.CORS(
+		handlers.AllowedHeaders([]string{
+			"Content-Type",
+			"Authorization",
+			"Origin",
+			"Accept",
+			"X-Requested-With",
+			"Test-Key",
+			"testkey",
+			"student-id",
+		}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
+		handlers.AllowedOrigins([]string{"*"}), // Adjust as needed
+		handlers.AllowCredentials(),
+		handlers.ExposedHeaders([]string{"Content-Length"}),
+		handlers.MaxAge(86400),
+	)
+
+	// Apply CORS middleware to AuthService routes
 	router.HandleFunc("/generate-otp", s.HandleGenerateOTP).Methods("POST")
 	router.HandleFunc("/validate-otp", s.HandleValidateOTP).Methods("POST")
 	router.HandleFunc("/verify-device-auth", s.HandleVerifyDeviceAuth).Methods("POST")
+	router.Use(corsMiddleware)
 }
 
 // Helper function to generate a random 4-digit OTP

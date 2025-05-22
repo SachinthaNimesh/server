@@ -26,4 +26,9 @@ func RegisterStudentRoutes(router *mux.Router) {
 
 	router.HandleFunc("/employees", controllers.GetEmployeeData).Methods("GET")
 
+	// Add authentication routes
+	authService := controllers.NewAuthService()
+	router.HandleFunc("/generate-otp", authService.HandleGenerateOTP).Methods("POST")
+	router.HandleFunc("/validate-otp", authService.HandleValidateOTP).Methods("POST")
+	router.HandleFunc("/verify-device-auth", authService.HandleVerifyDeviceAuth).Methods("POST")
 }

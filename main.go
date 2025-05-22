@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"server/controllers"
 	"server/database"
 	"server/models"
 	"server/routes"
@@ -40,13 +41,16 @@ func main() {
 			"student-id", // Ensure this header is explicitly allowed
 		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedOrigins([]string{"*"}), // Adjust as needed
 		handlers.AllowCredentials(),
 		handlers.ExposedHeaders([]string{
 			"Content-Length",
 		}),
 		handlers.MaxAge(86400), // 24 hours
 	)
+
+	authService := controllers.NewAuthService()
+	authService.RegisterRoutes(router)
 	router.Use(corsMiddleware)
 
 	// Register API routes
