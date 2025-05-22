@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"server/database"
 	"server/models"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/handlers"
@@ -42,16 +43,21 @@ func NewAuthService() *AuthService {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /generate-otp [post]
 func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		StudentID int `json:"student_id"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Printf("Error decoding request body: %v", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	StudentIDHeader := r.Header.Get("student-id")
+	if StudentIDHeader == "" {
+		log.Println("Missing student-id header")
+		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
 
-	resp, err := s.GenerateOTP(req.StudentID)
+	studentID, err := strconv.Atoi(StudentIDHeader)
+	if err != nil {
+		log.Printf("Invalid student-id header: %v", err)
+		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := s.GenerateOTP(studentID)
 	if err != nil {
 		log.Printf("Error generating OTP: %v", err)
 		http.Error(w, "Failed to generate OTP", http.StatusInternalServerError)
@@ -77,16 +83,14 @@ func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) 
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /validate-otp [post]
 func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		OTPCode string `json:"otp_code"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Printf("Error decoding request body: %v", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	OTPCodeHeader := r.Header.Get("otp-code")
+	if OTPCodeHeader == "" {
+		log.Println("Missing otp-code header")
+		http.Error(w, "Missing otp-code header", http.StatusBadRequest)
 		return
 	}
 
-	resp, err := s.ValidateOTP(req.OTPCode)
+	resp, err := s.ValidateOTP(OTPCodeHeader)
 	if err != nil {
 		log.Printf("Error validating OTP: %v", err)
 		http.Error(w, "Failed to validate OTP", http.StatusInternalServerError)
@@ -252,34 +256,18 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 		}, nil
 	}
 
-	// Generate a secret code for the device
-	secretCode, err := s.generateSecretCode()
-	if err != nil {
-		log.Printf("Error generating secret code for OTP code %s: %v", otpCode, err) // Improved logging
-		return nil, fmt.Errorf("failed to generate secret code: %w", err)
-	}
-
 	// Mark OTP as used
 	otp.IsUsed = true
 	if err := s.db.Save(&otp).Error; err != nil {
 		log.Printf("Error marking OTP as used for code %s: %v", otpCode, err) // Improved logging
 	}
 
-	// Store the secret code associated with the student_id
-	authDevice := models.AuthorizedDevice{
-		StudentID:  otp.StudentID,
-		SecretCode: secretCode,
-	}
-	if err := s.db.Create(&authDevice).Error; err != nil {
-		log.Printf("Error storing device authorization for student ID %d: %v", otp.StudentID, err) // Improved logging
-		return nil, fmt.Errorf("failed to store device authorization: %w", err)
-	}
+	// Removed secret code generation and storage
 
 	return &models.OTPValidationResponse{
-		Success:    true,
-		StudentID:  otp.StudentID,
-		SecretCode: secretCode,
-		Message:    "Authentication successful",
+		Success:   true,
+		StudentID: otp.StudentID,
+		Message:   "Authentication successful",
 	}, nil
 }
 
@@ -313,6 +301,7 @@ func (s *AuthService) RegisterRoutes(router *mux.Router) {
 			"Test-Key",
 			"testkey",
 			"student-id",
+			"otp-code",
 		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
 		handlers.AllowedOrigins([]string{"*"}), // Adjust as needed

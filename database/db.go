@@ -26,9 +26,6 @@ func ConnectDB() {
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
 	sslrootcert := "/server/config/ca.pem"
-	if _, err := os.Stat(sslrootcert); os.IsNotExist(err) {
-		sslrootcert = "C:/worky/server/config/ca.pem"
-	}
 
 	// sslrootcert := "C:/worky/server/config/ca.pem"
 

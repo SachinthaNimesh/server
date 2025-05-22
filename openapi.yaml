@@ -205,6 +205,13 @@ paths:
       description: Generate a new OTP for a student
       tags:
         - authentication
+      parameters:
+        - name: student-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
       requestBody:
         required: true
         content:
@@ -240,6 +247,13 @@ paths:
       description: Validate an OTP and generate a secret code
       tags:
         - authentication
+      parameters:
+        - name: otp-code
+          in: header
+          required: true
+          schema:
+            type: string
+          description: The OTP code to validate
       requestBody:
         required: true
         content:
