@@ -14,7 +14,10 @@ import (
 	"strconv"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/gorilla/handlers"
+=======
+>>>>>>> deb55d8 (remove jwt auth)
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
@@ -271,6 +274,7 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	}, nil
 }
 
+<<<<<<< HEAD
 // VerifyDeviceAuth verifies if a device is authorized using student_id and secret_code
 func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, error) {
 	var authDevice models.AuthorizedDevice
@@ -287,6 +291,18 @@ func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, 
 
 	return true, nil
 }
+=======
+// // Helper function to generate a JWT token
+// func (s *AuthService) generateJWT(studentID int) (string, error) {
+// 	claims := jwt.MapClaims{
+// 		"student_id": studentID,
+// 		"exp":        time.Now().Add(24 * time.Hour).Unix(), // Token expires in 24 hours
+// 	}
+// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 	secret := os.Getenv("JWT_SECRET") // Ensure JWT_SECRET is set in the environment
+// 	return token.SignedString([]byte(secret))
+// }
+>>>>>>> deb55d8 (remove jwt auth)
 
 // RegisterRoutes registers the routes for AuthService
 func (s *AuthService) RegisterRoutes(router *mux.Router) {
@@ -338,3 +354,28 @@ func (s *AuthService) generateSecretCode() (string, error) {
 	}
 	return hex.EncodeToString(bytes), nil
 }
+<<<<<<< HEAD
+=======
+
+// // VerifyToken verifies the JWT token and returns the claims
+// func (s *AuthService) VerifyToken(tokenString string) (jwt.MapClaims, error) {
+// 	// Parse the token
+// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+// 		// Ensure the signing method is HMAC
+// 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+// 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+// 		}
+// 		// Return the secret key
+// 		return []byte(os.Getenv("JWT_SECRET")), nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	// Extract claims
+// 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+// 		return claims, nil
+// 	}
+// 	return nil, errors.New("invalid token")
+// }
+>>>>>>> deb55d8 (remove jwt auth)
