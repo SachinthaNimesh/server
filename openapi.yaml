@@ -4,9 +4,9 @@ info:
   description: API for managing employees
   version: 1.0.0
 servers:
-  - url: https://87e89eab-95e5-4c0f-8192-7ee0196e1581-dev.e1-us-east-azure.choreoapis.dev/employee-mgmt-system/student-mgmt-server/v1.0
+  - url: http://localhost:8080/api/v1
 paths:
-  /post-mood:
+  /moods:
     post:
       summary: Create a new mood
       tags:
@@ -17,13 +17,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Mood"
-      parameters:
-        - name: student-id
-          in: header
-          required: true
-          schema:
-            type: integer
-          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -31,18 +24,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Mood"
-  /get-mood:
+  /moods/{id}:
     get:
       summary: Get a mood by ID
       tags:
         - moods
       parameters:
-        - name: student-id
-          in: header
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
-          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -50,18 +42,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Mood"
-  /get-students:
+  /students:
     get:
       summary: Get all students
       tags:
         - students
-      parameters:
-        - name: student-id
-          in: header
-          required: true
-          schema:
-            type: integer
-          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -71,7 +56,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Student"
-  /post-student:
     post:
       summary: Create a new student
       tags:
@@ -82,13 +66,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Student"
-      parameters:
-        - name: student-id
-          in: header
-          required: true
-          schema:
-            type: integer
-          description: The ID of the student
       responses:
         "201":
           description: Created
@@ -96,18 +73,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
-  /get-student:
+  /students/{id}:
     get:
       summary: Get a student by ID
       tags:
         - students
       parameters:
-        - name: student-id
-          in: header
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
-          description: The ID of the student
       responses:
         "200":
           description: OK
@@ -115,18 +91,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
-  /update-student:
     put:
       summary: Update a student by ID
       tags:
         - students
       parameters:
-        - name: student-id
-          in: header
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
-          description: The ID of the student
       requestBody:
         required: true
         content:
@@ -140,18 +114,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Student"
-  /delete-student:
     delete:
       summary: Delete a student by ID
       tags:
         - students
       parameters:
-        - name: student-id
-          in: header
+        - name: id
+          in: path
           required: true
           schema:
             type: integer
-          description: The ID of the student
       responses:
         "204":
           description: No Content
@@ -177,7 +149,188 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /dashboard:
+  /supervisors:
+    get:
+      summary: Get all supervisors
+      tags:
+        - supervisors
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Supervisor"
+    post:
+      summary: Create a new supervisor
+      tags:
+        - supervisors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Supervisor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+  /supervisors/{id}:
+    get:
+      summary: Get a supervisor by ID
+      tags:
+        - supervisors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+    put:
+      summary: Update a supervisor by ID
+      tags:
+        - supervisors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Supervisor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+    delete:
+      summary: Delete a supervisor by ID
+      tags:
+        - supervisors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+  /attendance/{id}:
+    post:
+      summary: Create a new attendance record
+      tags:
+        - attendance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Attendance"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendance"
+  /employers:
+    post:
+      summary: Create a new employer
+      tags:
+        - employers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employer"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employer"
+  /employers/{id}:
+    get:
+      summary: Get an employer by ID
+      tags:
+        - employers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employer"
+    put:
+      summary: Update an employer by ID
+      tags:
+        - employers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employer"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employer"
+    delete:
+      summary: Delete an employer by ID
+      tags:
+        - employers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+  /student-details:
     get:
       summary: Get student details for the dashboard
       description: Returns detailed student information including employer, attendance, and mood data.
@@ -205,13 +358,6 @@ paths:
       description: Generate a new OTP for a student
       tags:
         - authentication
-      parameters:
-        - name: student-id
-          in: header
-          required: true
-          schema:
-            type: integer
-          description: The ID of the student
       requestBody:
         required: true
         content:
@@ -247,13 +393,6 @@ paths:
       description: Validate an OTP and generate a secret code
       tags:
         - authentication
-      parameters:
-        - name: otp-code
-          in: header
-          required: true
-          schema:
-            type: string
-          description: The OTP code to validate
       requestBody:
         required: true
         content:
@@ -398,52 +537,28 @@ paths:
           description: Switching Protocols
         "400":
           description: Bad Request
-  /attendance:
-    post:
-      summary: Create or update attendance record
-      description: Handles check-in and check-out attendance records for students.
+  /employee-summary:
+    get:
+      summary: Get employee summary for a student
+      description: Returns the last 5 attendances, remarks, and last 5 daily moods for a student.
       tags:
-        - attendance
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                check_in:
-                  type: boolean
-                  description: Indicates if this is a check-in or check-out.
-                check_in_lat:
-                  type: number
-                  format: float
-                  description: Latitude for check-in.
-                check_in_long:
-                  type: number
-                  format: float
-                  description: Longitude for check-in.
+        - employees
       parameters:
         - name: student-id
           in: header
           required: true
           schema:
             type: integer
-          description: The ID of the student.
+          description: The student ID to fetch the summary for.
       responses:
         "200":
-          description: Attendance record created or updated successfully.
+          description: Employee summary retrieved successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Attendance"
+                $ref: "#/components/schemas/EmployeeSummary"
         "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "404":
-          description: Check-in record not found for today
+          description: Missing or invalid student-id header
           content:
             application/json:
               schema:
@@ -508,6 +623,32 @@ components:
         home_lat:
           type: number
           format: float
+    Supervisor:
+      type: object
+      properties:
+        contact_number:
+          type: string
+        email_address:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        student_id:
+          type: integer
+        supervisor_id:
+          type: integer
+    Employer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        contact_number:
+          type: string
     Attendance:
       type: object
       properties:
@@ -639,3 +780,34 @@ components:
           type: string
           format: date-time
           nullable: true
+    EmployeeSummary:
+      type: object
+      properties:
+        attendances:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmployeeAttendance"
+        remarks:
+          type: string
+        moods:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmployeeMood"
+    EmployeeAttendance:
+      type: object
+      properties:
+        check_in_date_time:
+          type: string
+          format: date-time
+        check_out_date_time:
+          type: string
+          format: date-time
+          nullable: true
+    EmployeeMood:
+      type: object
+      properties:
+        emotion:
+          type: string
+        recorded_at:
+          type: string
+          format: date-time

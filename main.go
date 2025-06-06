@@ -48,6 +48,10 @@ func main() {
 		handlers.MaxAge(86400), // 24 hours
 	)
 
+	// authService := controllers.NewAuthService()
+	// authService.RegisterRoutes(router)
+	router.Use(corsMiddleware)
+
 	// Register API routes
 	routes.RegisterStudentRoutes(router)
 
