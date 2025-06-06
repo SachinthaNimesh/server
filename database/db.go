@@ -29,7 +29,8 @@ func ConnectDB() {
 	os.Setenv("PGTZ", timezone)
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslrootcert := "/server/config/ca.pem"
+	// sslrootcert := "/server/config/ca.pem"
+	sslrootcert := "/Users/ca_crt/ca.crt"
 
 	// sslrootcert := "C:/worky/server/config/ca.pem"
 
