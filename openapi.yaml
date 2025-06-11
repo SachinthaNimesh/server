@@ -177,7 +177,192 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+<<<<<<< HEAD
   /dashboard:
+=======
+  /supervisors:
+    get:
+      summary: Get all supervisors
+      tags:
+        - supervisors
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Supervisor"
+    post:
+      summary: Create a new supervisor
+      tags:
+        - supervisors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Supervisor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+  /supervisors/{id}:
+    get:
+      summary: Get a supervisor by ID
+      tags:
+        - supervisors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+    put:
+      summary: Update a supervisor by ID
+      tags:
+        - supervisors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Supervisor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+    delete:
+      summary: Delete a supervisor by ID
+      tags:
+        - supervisors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+  /attendance/{id}:
+    post:
+      summary: Create a new attendance record
+      tags:
+        - attendance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Attendance"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendance"
+  /employers:
+    post:
+      summary: Create a new employer
+      tags:
+        - employers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employer"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employer"
+  /employers/{id}:
+    get:
+      summary: Get an employer by ID
+      tags:
+        - employers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employer"
+    put:
+      summary: Update an employer by ID
+      tags:
+        - employers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employer"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employer"
+    delete:
+      summary: Delete an employer by ID
+      tags:
+        - employers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+  /student-details:
+>>>>>>> ccf77cd (Summary API added)
     get:
       summary: Get student details for the dashboard
       description: Returns detailed student information including employer, attendance, and mood data.
@@ -387,6 +572,7 @@ paths:
           description: Invalid request body
         "401":
           description: Unauthorized
+<<<<<<< HEAD
   /attendance:
     post:
       summary: Create or update attendance record
@@ -411,12 +597,21 @@ paths:
                   type: number
                   format: float
                   description: Longitude for check-in.
+=======
+  /employee-summary:
+    get:
+      summary: Get employee summary for a student
+      description: Returns the last 5 attendances, remarks, and last 5 daily moods for a student.
+      tags:
+        - employees
+>>>>>>> ccf77cd (Summary API added)
       parameters:
         - name: student-id
           in: header
           required: true
           schema:
             type: integer
+<<<<<<< HEAD
           description: The ID of the student.
       responses:
         "200":
@@ -433,6 +628,18 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: Check-in record not found for today
+=======
+          description: The student ID to fetch the summary for.
+      responses:
+        "200":
+          description: Employee summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeSummary"
+        "400":
+          description: Missing or invalid student-id header
+>>>>>>> ccf77cd (Summary API added)
           content:
             application/json:
               schema:
@@ -443,6 +650,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+<<<<<<< HEAD
   /management:
     get:
       summary: Get management table
@@ -520,6 +728,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+=======
+>>>>>>> ccf77cd (Summary API added)
 components:
   schemas:
     Mood:
@@ -705,6 +915,7 @@ components:
           type: string
           format: date-time
           nullable: true
+<<<<<<< HEAD
     TraineeProfileResponse:
       type: object
       properties:
@@ -764,3 +975,36 @@ components:
                 type: string
                 format: date-time
                 example: "2025-06-01T18:25:45Z"
+=======
+    EmployeeSummary:
+      type: object
+      properties:
+        attendances:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmployeeAttendance"
+        remarks:
+          type: string
+        moods:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmployeeMood"
+    EmployeeAttendance:
+      type: object
+      properties:
+        check_in_date_time:
+          type: string
+          format: date-time
+        check_out_date_time:
+          type: string
+          format: date-time
+          nullable: true
+    EmployeeMood:
+      type: object
+      properties:
+        emotion:
+          type: string
+        recorded_at:
+          type: string
+          format: date-time
+>>>>>>> ccf77cd (Summary API added)
