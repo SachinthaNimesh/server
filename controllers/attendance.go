@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"server/database" // Make sure to import your database package
+	"server/database" 
 	"server/models"
 	"strconv"
 	"time"

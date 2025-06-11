@@ -7,7 +7,6 @@ import (
 	"os"
 	"server/controllers"
 	"server/database"
-	"server/middleware"
 	"server/models"
 	"server/routes"
 
@@ -67,7 +66,6 @@ func main() {
 	routes.RegisterStudentRoutes(router)
 
 	// Add middleware
-	router.Use(middleware.DBMiddleware(db))
 
 	// Start the server
 	log.Println("Server started on port", port)
