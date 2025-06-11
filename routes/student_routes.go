@@ -26,4 +26,5 @@ func RegisterStudentRoutes(router *mux.Router) {
 
 	router.HandleFunc("/employees", controllers.GetEmployeeData).Methods("GET")
 	router.HandleFunc("/management", controllers.GetManagementTable).Methods("GET")
+	router.HandleFunc("/trainee-profile", controllers.GetTraineeProfile).Methods("GET")
 }

@@ -482,6 +482,44 @@ paths:
                       nullable: true
         "500":
           description: Internal Server Error
+  /trainee-profile:
+    get:
+      summary: Get trainee profile data
+      description: Returns student information, recent moods, and recent attendance records
+      tags:
+        - profile
+      parameters:
+        - name: student-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the student
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraineeProfileResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     Mood:
@@ -667,3 +705,58 @@ components:
           type: string
           format: date-time
           nullable: true
+    TraineeProfileResponse:
+      type: object
+      properties:
+        student_info:
+          type: object
+          properties:
+            first_name:
+              type: string
+              example: "John"
+            last_name:
+              type: string
+              example: "Doe"
+            gender:
+              type: string
+              example: "Male"
+            contact_number:
+              type: string
+              example: "123-456-7890"
+            contact_number_guardian:
+              type: string
+              example: "098-765-4321"
+            remarks:
+              type: string
+              example: "Regular attendance"
+        recent_moods:
+          type: array
+          items:
+            type: object
+            properties:
+              emotion:
+                type: string
+                example: "happy"
+              recorded_at:
+                type: string
+                format: date-time
+                example: "2025-06-01T09:30:00Z"
+        recent_attendance:
+          type: array
+          items:
+            type: object
+            properties:
+              scheduled_check_in:
+                type: string
+                example: "10:30:00"
+              scheduled_check_out:
+                type: string
+                example: "18:30:00"
+              actual_check_in:
+                type: string
+                format: date-time
+                example: "2025-06-01T10:35:12Z"
+              actual_check_out:
+                type: string
+                format: date-time
+                example: "2025-06-01T18:25:45Z"

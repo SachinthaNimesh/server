@@ -29,9 +29,9 @@ func ConnectDB() {
 	os.Setenv("PGTZ", timezone)
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslrootcert := "/server/config/ca.pem"
+	// sslrootcert := "/server/config/ca.pem"
 
-	// sslrootcert := "C:/worky/server/config/ca.pem"
+	sslrootcert := "C:/worky/server/config/ca.pem"
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
 		log.Fatal("❌ Database connection environment variables are not set properly")
@@ -60,4 +60,16 @@ func ConnectDB() {
 
 	DB = db
 	log.Println("✅ Database connected successfully!")
+}
+
+// Initialize sets up the database connection
+func Initialize(connectionString string) {
+	var err error
+
+	DB, err = gorm.Open(postgres.Open(connectionString), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	log.Println("Database connection established")
 }

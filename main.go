@@ -1,16 +1,19 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 	"server/controllers"
 	"server/database"
+	"server/middleware"
 	"server/models"
 	"server/routes"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 func main() {
@@ -24,6 +27,13 @@ func main() {
 	database.ConnectDB()
 	database.DB.AutoMigrate(&models.Student{}, &models.Supervisor{}, &models.Mood{}, &models.Employer{}, &models.Attendance{})
 	log.Println("Database migrated")
+
+	// Initialize DB connection
+	db, err := sql.Open("postgres", "your_connection_string_here")
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer db.Close()
 
 	// Define router
 	router := mux.NewRouter()
@@ -56,9 +66,10 @@ func main() {
 	// Register API routes
 	routes.RegisterStudentRoutes(router)
 
+	// Add middleware
+	router.Use(middleware.DBMiddleware(db))
+
 	// Start the server
 	log.Println("Server started on port", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-		log.Fatalf("Could not start server: %s\n", err)
-	}
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
