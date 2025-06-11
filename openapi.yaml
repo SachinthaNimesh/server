@@ -387,17 +387,6 @@ paths:
           description: Invalid request body
         "401":
           description: Unauthorized
-  /ws:
-    get:
-      summary: WebSocket connection for real-time updates
-      description: Establishes a WebSocket connection to receive real-time location updates.
-      tags:
-        - websocket
-      responses:
-        "101":
-          description: Switching Protocols
-        "400":
-          description: Bad Request
   /attendance:
     post:
       summary: Create or update attendance record
@@ -454,6 +443,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /management:
+    get:
+      summary: Get management table
+      description: Returns a joined table of students, employers, and supervisors.
+      tags:
+        - management
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    student_id:
+                      type: integer
+                    student_first_name:
+                      type: string
+                    student_last_name:
+                      type: string
+                    employer_name:
+                      type: string
+                      nullable: true
+                    employer_contact_number:
+                      type: string
+                      nullable: true
+                    supervisor_first_name:
+                      type: string
+                      nullable: true
+                    supervisor_last_name:
+                      type: string
+                      nullable: true
+                    supervisor_contact_number:
+                      type: string
+                      nullable: true
+        "500":
+          description: Internal Server Error
 components:
   schemas:
     Mood:
