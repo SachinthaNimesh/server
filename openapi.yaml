@@ -729,6 +729,10 @@ components:
             remarks:
               type: string
               example: "Regular attendance"
+            employer_name:
+              type: string
+              example: "Acme Corp"
+              nullable: true
         recent_moods:
           type: array
           items:

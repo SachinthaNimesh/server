@@ -38,6 +38,18 @@ func GetTraineeProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch employer name
+	var employerName string
+	if student.EmployerID > 0 {
+		var employer models.Employer
+		if err := database.DB.Select("name").First(&employer, student.EmployerID).Error; err != nil {
+			log.Printf("Error fetching employer data: %v", err)
+			// Continue execution even if employer data can't be fetched
+		} else {
+			employerName = employer.Name
+		}
+	}
+
 	// Fetch recent moods
 	var recentMoods []models.Mood
 	if err := database.DB.Where("student_id = ? AND is_daily = ?", studentID, true).
@@ -79,6 +91,7 @@ func GetTraineeProfile(w http.ResponseWriter, r *http.Request) {
 		ContactNumber         string `json:"contact_number"`
 		ContactNumberGuardian string `json:"contact_number_guardian"`
 		Remarks               string `json:"remarks"`
+		EmployerName          string `json:"employer_name,omitempty"`
 	}{
 		FirstName:             student.FirstName,
 		LastName:              student.LastName,
@@ -86,6 +99,7 @@ func GetTraineeProfile(w http.ResponseWriter, r *http.Request) {
 		ContactNumber:         student.ContactNumber,
 		ContactNumberGuardian: student.ContactNumberGuardian,
 		Remarks:               student.Remarks,
+		EmployerName:          employerName,
 	}
 
 	response := struct {
