@@ -199,3 +199,24 @@ func DeleteEmployer(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// GetAllEmployerIDsAndNames godoc
+// @Summary Get all employer IDs and names
+// @Description Returns a list of all employer IDs and their names
+// @Tags employers
+// @Produce json
+// @Success 200 {array} object
+// @Router /employers/ids-names [get]
+func GetAllEmployerIDsAndNames(w http.ResponseWriter, r *http.Request) {
+	type EmployerIDName struct {
+		ID   uint64 `json:"id"`
+		Name string `json:"name"`
+	}
+	var employers []EmployerIDName
+	if err := database.DB.Table("employer").Select("id, name").Scan(&employers).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(employers)
+}

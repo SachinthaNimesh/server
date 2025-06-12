@@ -610,6 +610,48 @@ paths:
           description: Student not found
         "500":
           description: Internal Server Error
+  /get-employer-ids:
+    get:
+      summary: Get all employer IDs and names
+      tags:
+        - employers
+      responses:
+        "200":
+          description: List of employer IDs and names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    name:
+                      type: string
+  /get-supervisor-ids:
+    get:
+      summary: Get all supervisor IDs and names
+      tags:
+        - supervisors
+      responses:
+        "200":
+          description: List of supervisor IDs and names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    supervisor_id:
+                      type: integer
+                      format: int64
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
 components:
   schemas:
     Mood:
@@ -735,14 +777,14 @@ components:
           example: "2023-05-01T08:30:00Z"
         check_out_date_time:
           type: string
-          format: date-time
-          example: "2023-05-01T17:30:00Z"
+          format: date-timen
+          example: "2023-05-01T17:30:00Z"e
         emotion:
           type: string
-          example: "happy"
+          example: "happy"thentication successful"
     OTPResponse:
       type: object
-      properties:
+      properties:cd1234"
         student_id:
           type: integer
           example: 1
@@ -753,43 +795,23 @@ components:
           type: string
           format: date-time
           example: "2025-04-30T15:30:00Z"
-    OTPValidationResponse:
-      type: object
+    OTPValidationResponse:eger
+      type: objectue
       properties:
-        success:
-          type: boolean
-          example: true
-        message:
-          type: string
-          example: "Authentication successful"
-        token:
-          type: string
-          example: "abcd1234"
-    Employee:
-      type: object
-      properties:
-        student_id:
-          type: integer
-        student_name:
-          type: string
-        student_contact:
-          type: string
-        employer_id:
-          type: integer
           nullable: true
         employer_name:
+          type: stringontact:
+          nullable: truetring
+        employer_contact:rue
+          type: stringss:
+          nullable: trueg
+        employer_address:e
           type: string
           nullable: true
-        employer_contact:
-          type: string
-          nullable: true
-        employer_address:
-          type: string
-          nullable: true
-        supervisor_id:
+        supervisor_id:ue
           type: integer
           nullable: true
-        supervisor_name:
+        supervisor_name: true
           type: string
           nullable: true
         latest_otp_code:
@@ -804,26 +826,26 @@ components:
       properties:
         student_info:
           type: object
-          properties:
-            first_name:
-              type: string
-              example: "John"
-            last_name:
+          properties:tring
+            first_name:: "John"
+              type: string_name:
+              example: "John"ng
+            last_name:"Doe"
               type: string
               example: "Doe"
             gender:
-              type: string
+              type: string:
               example: "Male"
-            contact_number:
+            contact_number:890"
               type: string
-              example: "123-456-7890"
-            contact_number_guardian:
+              example: "123-456-7890"ing
+            contact_number_guardian:65-4321"
               type: string
               example: "098-765-4321"
-            remarks:
-              type: string
-              example: "Regular attendance"
-            employer_name:
+            remarks:: "Regular attendance"
+              type: stringoyer_name:
+              example: "Regular attendance"ng
+            employer_name:"Acme Corp"
               type: string
               example: "Acme Corp"
         recent_moods:
@@ -831,17 +853,37 @@ components:
           items:
             type: object
             properties:
-              emotion:
+              emotion:ppy"
                 type: string
                 example: "happy"
-              recorded_at:
-                type: string
+              recorded_at:me
+                type: string25-06-01T09:30:00Z"
                 format: date-time
                 example: "2025-06-01T09:30:00Z"
-              is_daily:
-                type: boolean
-                example: true
-        recent_attendance:
+              is_daily:                example: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                example: "2025-06-01T18:25:45Z"                format: date-time                type: string              actual_check_out:                example: "2025-06-01T10:35:12Z"                format: date-time                type: string              actual_check_in:                example: "18:30:00"                type: string              scheduled_check_out:                example: "10:30:00"                type: string              scheduled_check_in:            properties:            type: object          items:          type: array        recent_attendance:                example: true                type: boolean        recent_attendance:
           type: array
           items:
             type: object

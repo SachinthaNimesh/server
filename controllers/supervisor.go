@@ -145,3 +145,25 @@ func DeleteSupervisor(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// GetAllSupervisorIDsAndNames godoc
+// @Summary Get all supervisor IDs and names
+// @Description Returns a list of all supervisor IDs and their names
+// @Tags supervisors
+// @Produce json
+// @Success 200 {array} object
+// @Router /supervisors/ids-names [get]
+func GetAllSupervisorIDsAndNames(w http.ResponseWriter, r *http.Request) {
+	type SupervisorIDName struct {
+		SupervisorID uint64 `json:"supervisor_id"`
+		FirstName    string `json:"first_name"`
+		LastName     string `json:"last_name"`
+	}
+	var supervisors []SupervisorIDName
+	if err := database.DB.Table("supervisor").Select("supervisor_id, first_name, last_name").Scan(&supervisors).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(supervisors)
+}
