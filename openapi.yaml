@@ -520,6 +520,96 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /create-employee:
+    post:
+      summary: Create a new employee
+      tags:
+        - employees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employee"
+      responses:
+        "201":
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Employee"
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+
+  /update-employee:
+    put:
+      summary: Update an employee by student-id header
+      tags:
+        - employees
+      parameters:
+        - name: student-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the employee (student-id)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Employee"
+      responses:
+        "200":
+          description: Employee updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Employee"
+        "400":
+          description: Bad Request
+        "404":
+          description: Employee not found
+        "500":
+          description: Internal Server Error
+
+  /delete-employee:
+    delete:
+      summary: Delete an employee by student-id header
+      tags:
+        - employees
+      parameters:
+        - name: student-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the employee (student-id)
+      responses:
+        "200":
+          description: Employee deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+                    example: "Employee deleted successfully"
+        "400":
+          description: Bad Request
+        "404":
+          description: Employee not found
+        "500":
+          description: Internal Server Error
 components:
   schemas:
     Mood:
