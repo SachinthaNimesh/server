@@ -7,8 +7,6 @@ import (
 	"server/database"
 	"server/models"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 func getStudentIDFromHeader(r *http.Request) (int, error) {
@@ -86,18 +84,16 @@ func GetStudent(w http.ResponseWriter, r *http.Request) {
 func CreateStudent(w http.ResponseWriter, r *http.Request) {
 	var student models.Student
 	if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
-		log.Printf("Error decoding student data: %v", err) // Log error
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if err := database.DB.Create(&student).Error; err != nil {
-		log.Printf("Error creating student: %v", err) // Log error
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to create student", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Created student: %+v", student) // Log success
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(student)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{"data": student})
 }
 
 // UpdateStudent godoc
@@ -114,31 +110,29 @@ func CreateStudent(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /students/{id} [put]
 func UpdateStudent(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	var student models.Student
-	if err := database.DB.First(&student, id).Error; err != nil {
-		log.Printf("Error fetching student with ID %s for update: %v", id, err) // Log error
-		http.Error(w, err.Error(), http.StatusNotFound)
+	idStr := r.Header.Get("student-id")
+	if idStr == "" {
+		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&student); err != nil {
-		log.Printf("Error decoding student data for ID %s: %v", id, err) // Log error
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
+		return
+	}
+	var student models.Student
+	if err := database.DB.First(&student, id).Error; err != nil {
+		http.Error(w, "Student not found", http.StatusNotFound)
+		return
+	}
+	var input models.Student
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	if err := database.DB.Save(&student).Error; err != nil {
-		log.Printf("Error updating student with ID %s: %v", id, err) // Log error
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	log.Printf("Updated student with ID %s: %+v", id, student) // Log success
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(student)
+	database.DB.Model(&student).Updates(input)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"data": student})
 }
 
 // DeleteStudent godoc
@@ -150,15 +144,20 @@ func UpdateStudent(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /students/{id} [delete]
 func DeleteStudent(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	if err := database.DB.Delete(&models.Student{}, id).Error; err != nil {
-		log.Printf("Error deleting student with ID %s: %v", id, err) // Log error
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	idStr := r.Header.Get("student-id")
+	if idStr == "" {
+		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
-
-	log.Printf("Deleted student with ID %s", id) // Log success
-	w.WriteHeader(http.StatusNoContent)
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
+		return
+	}
+	if err := database.DB.Delete(&models.Student{}, id).Error; err != nil {
+		http.Error(w, "Failed to delete student", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"data": "Student deleted successfully"})
 }

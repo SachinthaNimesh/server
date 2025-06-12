@@ -40,9 +40,9 @@ func GetTraineeProfile(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch employer name
 	var employerName string
-	if student.EmployerID > 0 {
+	if student.EmployerID != nil && *student.EmployerID > 0 {
 		var employer models.Employer
-		if err := database.DB.Select("name").First(&employer, student.EmployerID).Error; err != nil {
+		if err := database.DB.Select("name").First(&employer, *student.EmployerID).Error; err != nil {
 			log.Printf("Error fetching employer data: %v", err)
 			// Continue execution even if employer data can't be fetched
 		} else {

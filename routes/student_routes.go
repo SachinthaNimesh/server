@@ -8,16 +8,16 @@ import (
 
 func RegisterStudentRoutes(router *mux.Router) {
 	router.HandleFunc("/get-students", controllers.GetStudents).Methods("GET")
-	router.HandleFunc("/post-student", controllers.CreateStudent).Methods("POST")
+	// router.HandleFunc("/post-student", controllers.CreateStudent).Methods("POST")
 	// RegisterEmployeeRoutes sets up the employee routes using Gorilla Mux
 
-	router.HandleFunc("/create-employee", controllers.CreateEmployee).Methods("POST")
-	router.HandleFunc("/update-employee", controllers.UpdateEmployee).Methods("PUT")
-	router.HandleFunc("/delete-employee", controllers.DeleteEmployee).Methods("DELETE")
+	router.HandleFunc("/create-employee", controllers.CreateStudent).Methods("POST")
+	router.HandleFunc("/update-employee", controllers.UpdateStudent).Methods("PUT")
+	router.HandleFunc("/delete-employee", controllers.DeleteStudent).Methods("DELETE")
 
 	router.HandleFunc("/get-student", controllers.GetStudent).Methods("GET")
 
-	router.HandleFunc("/delete-student", controllers.DeleteStudent).Methods("DELETE")
+	// router.HandleFunc("/delete-student", controllers.DeleteStudent).Methods("DELETE")
 
 	// Add attendance routes
 	router.HandleFunc("/attendance", controllers.PostAttendance).Methods("POST")

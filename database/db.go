@@ -29,9 +29,9 @@ func ConnectDB() {
 	os.Setenv("PGTZ", timezone)
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslrootcert := "/server/config/ca.pem"
+	// sslrootcert := "/server/config/ca.pem"
 
-	// sslrootcert := "C:/worky/server/config/ca.pem"
+	sslrootcert := "C:/worky/server/config/ca.pem"
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
 		log.Fatal("❌ Database connection environment variables are not set properly")

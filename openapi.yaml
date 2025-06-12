@@ -530,17 +530,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Employee"
+              $ref: "#/components/schemas/Student"
       responses:
         "201":
-          description: Employee created
+          description: Student created
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   data:
-                    $ref: "#/components/schemas/Employee"
+                    $ref: "#/components/schemas/Student"
         "400":
           description: Bad Request
         "500":
@@ -563,21 +563,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Employee"
+              $ref: "#/components/schemas/Student"
       responses:
         "200":
-          description: Employee updated
+          description: Student updated
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   data:
-                    $ref: "#/components/schemas/Employee"
+                    $ref: "#/components/schemas/Student"
         "400":
           description: Bad Request
         "404":
-          description: Employee not found
+          description: Student not found
         "500":
           description: Internal Server Error
 
@@ -595,7 +595,7 @@ paths:
           description: The ID of the employee (student-id)
       responses:
         "200":
-          description: Employee deleted
+          description: Student deleted
           content:
             application/json:
               schema:
@@ -603,11 +603,11 @@ paths:
                 properties:
                   data:
                     type: string
-                    example: "Employee deleted successfully"
+                    example: "Student deleted successfully"
         "400":
           description: Bad Request
         "404":
-          description: Employee not found
+          description: Student not found
         "500":
           description: Internal Server Error
 components:
@@ -630,13 +630,14 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         first_name:
           type: string
         last_name:
           type: string
         dob:
           type: string
-          format: date
+          format: date-time
         gender:
           type: string
         address_line1:
@@ -651,19 +652,22 @@ components:
           type: string
         supervisor_id:
           type: integer
-        employer_id:
-          type: integer
+          nullable: true
         remarks:
           type: string
-        photo:
-          type: string
-          format: byte
         home_long:
           type: number
           format: float
         home_lat:
           type: number
           format: float
+        employer_id:
+          type: integer
+          nullable: true
+        check_in_time:
+          type: string
+        check_out_time:
+          type: string
     Attendance:
       type: object
       properties:
