@@ -38,9 +38,29 @@ func GetManagementTable(w http.ResponseWriter, r *http.Request) {
 		LEFT JOIN supervisor AS sup ON s.id = sup.student_id
 	`
 
-	if err := database.DB.Raw(query).Scan(&results).Error; err != nil {
+	rows, err := database.DB.Query(query)
+	if err != nil {
 		http.Error(w, "Failed to fetch data", http.StatusInternalServerError)
 		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var res StudentEmployerSupervisor
+		if err := rows.Scan(
+			&res.StudentID,
+			&res.StudentFirstName,
+			&res.StudentLastName,
+			&res.EmployerName,
+			&res.EmployerContactNumber,
+			&res.SupervisorFirstName,
+			&res.SupervisorLastName,
+			&res.SupervisorContactNumber,
+		); err != nil {
+			http.Error(w, "Failed to scan data", http.StatusInternalServerError)
+			return
+		}
+		results = append(results, res)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

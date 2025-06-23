@@ -5,7 +5,7 @@ import (
 )
 
 type Student struct {
-	ID                    uint64    `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID                    uint64    `json:"id"`
 	FirstName             string    `json:"first_name"`
 	LastName              string    `json:"last_name"`
 	DOB                   time.Time `json:"dob"`
@@ -22,9 +22,4 @@ type Student struct {
 	EmployerID            *uint     `json:"employer_id"`
 	CheckInTime           string    `json:"check_in_time"`
 	CheckOutTime          string    `json:"check_out_time"`
-}
-
-// TableName sets the table name to "student"
-func (Student) TableName() string {
-	return "student"
 }

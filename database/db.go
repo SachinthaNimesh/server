@@ -1,16 +1,16 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/joho/godotenv" // Import godotenv
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
-var DB *gorm.DB
+var DB *sql.DB
 
 func ConnectDB() {
 	// Load environment variables from .env file
@@ -23,15 +23,9 @@ func ConnectDB() {
 	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
-
-	// Set the timezone for the database connection
-	timezone := "Asia/Kolkata"
-	os.Setenv("PGTZ", timezone)
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslrootcert := "/server/config/ca.pem"
-
-	// sslrootcert := "C:/worky/server/config/ca.pem"
+	sslrootcert := "config/ca.pem"
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
 		log.Fatal("❌ Database connection environment variables are not set properly")
@@ -51,9 +45,14 @@ func ConnectDB() {
 	log.Println("ℹ️ Attempting to connect to the database...")
 
 	// Open a new database connection
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatalf("❌ Failed to connect to database: %v", err)
+	}
+
+	// Test the connection
+	if err := db.Ping(); err != nil {
+		log.Fatalf("❌ Failed to ping database: %v", err)
 	}
 
 	log.Println("✅ Database connection established successfully!")
@@ -66,7 +65,7 @@ func ConnectDB() {
 func Initialize(connectionString string) {
 	var err error
 
-	DB, err = gorm.Open(postgres.Open(connectionString), &gorm.Config{})
+	DB, err = sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

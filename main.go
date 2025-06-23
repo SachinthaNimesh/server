@@ -1,13 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
 	"server/controllers"
 	"server/database"
-	"server/models"
 	"server/routes"
 
 	"github.com/gorilla/handlers"
@@ -24,15 +22,6 @@ func main() {
 
 	// Connect to DB with environment variables
 	database.ConnectDB()
-	database.DB.AutoMigrate(&models.Student{}, &models.Supervisor{}, &models.Mood{}, &models.Employer{}, &models.Attendance{})
-	log.Println("Database migrated")
-
-	// Initialize DB connection
-	db, err := sql.Open("postgres", "your_connection_string_here")
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
-	defer db.Close()
 
 	// Define router
 	router := mux.NewRouter()

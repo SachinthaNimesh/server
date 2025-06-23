@@ -105,13 +105,12 @@ func ValidateLocationHandler() http.HandlerFunc {
 				student AS s 
 			ON 
 				e.student_id = s.id
-			WHERE s.id = ?
+			WHERE s.id = $1
 			LIMIT 1
 		`
 
 		var resp LocationResponse
-		row := database.DB.Raw(query, studentID).Row()
-		err := row.Scan(
+		err := database.DB.QueryRow(query, studentID).Scan(
 			&resp.EmployerLong,
 			&resp.EmployerLat,
 			&resp.StudentLong,

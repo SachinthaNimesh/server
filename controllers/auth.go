@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -16,18 +17,17 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
 // AuthService handles authentication-related operations
 type AuthService struct {
-	db *gorm.DB
+	db *sql.DB
 }
 
 // NewAuthService creates a new auth service
 func NewAuthService() *AuthService {
 	return &AuthService{
-		db: database.DB, // Use the GORM DB instance
+		db: database.DB, // Use the sql.DB instance
 	}
 }
 
@@ -144,9 +144,7 @@ func (s *AuthService) HandleVerifyDeviceAuth(w http.ResponseWriter, r *http.Requ
 func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	// Check if student exists
 	var count int64
-	err := s.db.Model(&models.Student{}).
-		Where("id = ?", studentID). // Removed is_active check
-		Count(&count).Error
+	err := s.db.QueryRow("SELECT COUNT(*) FROM students WHERE id = ?", studentID).Scan(&count)
 	if err != nil {
 		log.Printf("Database error while checking student existence: %v", err)
 		return nil, fmt.Errorf("database error: %w", err)
@@ -157,8 +155,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 
 	// Check if there's an existing unused OTP that hasn't expired
 	var existingOTP models.OTP
-	err = s.db.Where("student_id = ? AND is_used = false AND expires_at > ?", studentID, time.Now()).
-		First(&existingOTP).Error
+	err = s.db.QueryRow("SELECT otp_code, expires_at FROM otps WHERE student_id = ? AND is_used = false AND expires_at > CURRENT_TIMESTAMP", studentID).Scan(&existingOTP.OTPCode, &existingOTP.ExpiresAt)
 	if err == nil {
 		log.Printf("An unused OTP already exists for student ID %d", studentID)
 		return &models.OTPResponse{
@@ -166,11 +163,9 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 			OTPCode:   existingOTP.OTPCode,
 			ExpiresAt: existingOTP.ExpiresAt,
 		}, nil
-	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+	} else if errors.Is(err, sql.ErrNoRows) {
 		// Mark expired OTPs as used
-		err = s.db.Model(&models.OTP{}).
-			Where("student_id = ? AND is_used = false AND expires_at <= ?", studentID, time.Now()).
-			Update("is_used", true).Error
+		_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = ? AND is_used = false AND expires_at <= CURRENT_TIMESTAMP", studentID)
 		if err != nil {
 			log.Printf("Error marking expired OTPs as used for student ID %d: %v", studentID, err)
 			return nil, fmt.Errorf("failed to update expired OTPs: %w", err)
@@ -191,9 +186,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	expiresAt := time.Now().Add(30 * time.Minute)
 
 	// Invalidate any existing unused OTPs for this student
-	err = s.db.Model(&models.OTP{}).
-		Where("student_id = ? AND is_used = false", studentID).
-		Update("is_used", true).Error
+	_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = ? AND is_used = false", studentID)
 	if err != nil {
 		log.Printf("Error invalidating existing OTPs: %v", err)
 		return nil, fmt.Errorf("failed to invalidate existing OTPs: %w", err)
@@ -206,7 +199,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 		ExpiresAt: expiresAt,
 		IsUsed:    false,
 	}
-	err = s.db.Create(&newOTP).Error
+	err = s.db.QueryRow("INSERT INTO otps (student_id, otp_code, expires_at, is_used) VALUES (?, ?, ?, ?) RETURNING otp_code", studentID, otp, expiresAt, false).Scan(&newOTP.OTPCode)
 	if err != nil {
 		log.Printf("Error storing new OTP: %v", err)
 		return nil, fmt.Errorf("failed to store OTP: %w", err)
@@ -222,8 +215,8 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 // ValidateOTP checks if an OTP is valid and returns student_id and a new secret code
 func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse, error) {
 	var otp models.OTP
-	err := s.db.Where("otp_code = ?", otpCode).First(&otp).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	err := s.db.QueryRow("SELECT student_id, is_used, expires_at FROM otps WHERE otp_code = ?", otpCode).Scan(&otp.StudentID, &otp.IsUsed, &otp.ExpiresAt)
+	if errors.Is(err, sql.ErrNoRows) {
 		log.Printf("OTP not found for code: %s", otpCode) // Improved logging
 		return &models.OTPValidationResponse{
 			Success: false,
@@ -247,7 +240,8 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 	if time.Now().After(otp.ExpiresAt) {
 		log.Printf("OTP expired for code: %s", otpCode) // Improved logging
 		otp.IsUsed = true
-		if err := s.db.Save(&otp).Error; err != nil {
+		_, err := s.db.Exec("UPDATE otps SET is_used = true WHERE otp_code = ?", otpCode)
+		if err != nil {
 			log.Printf("Error marking expired OTP as used for code %s: %v", otpCode, err) // Improved logging
 		}
 		return &models.OTPValidationResponse{
@@ -258,7 +252,8 @@ func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse
 
 	// Mark OTP as used
 	otp.IsUsed = true
-	if err := s.db.Save(&otp).Error; err != nil {
+	_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE otp_code = ?", otpCode)
+	if err != nil {
 		log.Printf("Error marking OTP as used for code %s: %v", otpCode, err) // Improved logging
 	}
 
@@ -276,9 +271,8 @@ func (s *AuthService) VerifyDeviceAuth(studentID int, secretCode string) (bool, 
 	var authDevice models.AuthorizedDevice
 
 	// Check if the device exists
-	err := s.db.Where("student_id = ? AND secret_code = ?", studentID, secretCode).
-		First(&authDevice).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	err := s.db.QueryRow("SELECT * FROM authorized_devices WHERE student_id = ? AND secret_code = ?", studentID, secretCode).Scan(&authDevice.ID, &authDevice.StudentID, &authDevice.SecretCode)
+	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
 	} else if err != nil {
 		log.Printf("Database error while verifying device authorization: %v", err)

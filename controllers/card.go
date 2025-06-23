@@ -41,7 +41,7 @@ func GetStudentDetails(w http.ResponseWriter, r *http.Request) {
     `
 
 	var students []models.StudentCard
-	rows, err := database.DB.Raw(query).Rows() // Use Raw to execute the query
+	rows, err := database.DB.Query(query)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(models.ErrorResponse{Error: "Failed to execute query"})

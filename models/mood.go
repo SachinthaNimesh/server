@@ -5,13 +5,9 @@ import (
 )
 
 type Mood struct {
-	ID         int       `json:"id" gorm:"primaryKey"`
-	StudentID  int       `json:"student_id" gorm:"index"`
-	RecordedAt time.Time `json:"recorded_at" gorm:"index;default:CURRENT_TIMESTAMP"`
+	ID         int       `json:"id"`
+	StudentID  int       `json:"student_id"`
+	RecordedAt time.Time `json:"recorded_at"`
 	Emotion    string    `json:"emotion"`
 	IsDaily    bool      `json:"is_daily"`
-}
-
-func (Mood) TableName() string {
-	return "mood"
 }
