@@ -31,17 +31,7 @@ func NewAuthService() *AuthService {
 	}
 }
 
-// HandleGenerateOTP godoc
-// @Summary Generate OTP for a student
-// @Description Generate a new OTP for a student
-// @Tags authentication
-// @Accept json
-// @Produce json
-// @Param request body struct { StudentID int `json:"student_id"` } true "Student ID"
-// @Success 200 {object} models.OTPResponse
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
-// @Router /generate-otp [post]
+// HandleGenerateOTP
 func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) {
 	StudentIDHeader := r.Header.Get("student-id")
 	if StudentIDHeader == "" {
@@ -60,7 +50,7 @@ func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) 
 	resp, err := s.GenerateOTP(studentID)
 	if err != nil {
 		log.Printf("Error generating OTP: %v", err)
-		http.Error(w, "Failed to generate OTP", http.StatusInternalServerError)
+		http.Error(w, "Failed to generate OTP: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -71,17 +61,7 @@ func (s *AuthService) HandleGenerateOTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// HandleValidateOTP godoc
-// @Summary Validate OTP
-// @Description Validate an OTP and generate a secret code
-// @Tags authentication
-// @Accept json
-// @Produce json
-// @Param request body struct { OTPCode string `json:"otp_code"` } true "OTP Code"
-// @Success 200 {object} models.OTPValidationResponse
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
-// @Router /validate-otp [post]
+// HandleValidateOTP
 func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) {
 	OTPCodeHeader := r.Header.Get("otp-code")
 	if OTPCodeHeader == "" {
@@ -104,17 +84,7 @@ func (s *AuthService) HandleValidateOTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// HandleVerifyDeviceAuth godoc
-// @Summary Verify device authorization
-// @Description Verify if a device is authorized using student ID and secret code
-// @Tags authentication
-// @Accept json
-// @Produce json
-// @Param request body struct { StudentID int `json:"student_id"` SecretCode string `json:"secret_code"` } true "Authorization details"
-// @Success 200 {object} map[string]bool
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
-// @Router /verify-device-auth [post]
+// HandleVerifyDeviceAuth
 func (s *AuthService) HandleVerifyDeviceAuth(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		StudentID  int    `json:"student_id"`
@@ -304,7 +274,7 @@ func (s *AuthService) RegisterRoutes(router *mux.Router) {
 			"otp-code",
 		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"*"}), // Adjust as needed
+		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowCredentials(),
 		handlers.ExposedHeaders([]string{"Content-Length"}),
 		handlers.MaxAge(86400),
