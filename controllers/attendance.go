@@ -53,15 +53,20 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("Creating new check-in record")
 		query := `INSERT INTO attendance (student_id, check_in_lat, check_in_long, check_in_date_time) VALUES ($1, $2, $3, $4) RETURNING id, student_id, check_in_lat, check_in_long, check_in_date_time`
+		log.Printf("Insert Query: %s", query)
+		log.Printf("Insert Params: student_id=%d, lat=%f, long=%f, datetime=%v", attendance.StudentID, attendance.CheckInLat, attendance.CheckInLong, attendance.CheckInDateTime)
 		row := database.DB.QueryRow(query, attendance.StudentID, attendance.CheckInLat, attendance.CheckInLong, attendance.CheckInDateTime)
 		err := row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime)
 		if err != nil {
-			log.Printf("Database error: %v", err)
+			log.Printf("Database error on insert: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		log.Printf("Check-in record created: %+v", attendance)
 	} else {
 		query := `SELECT id, student_id, check_in_lat, check_in_long, check_in_date_time, check_out_lat, check_out_long, check_out_date_time FROM attendance WHERE student_id = $1 AND DATE(check_in_date_time) = $2 LIMIT 1`
+		log.Printf("Select Query: %s", query)
+		log.Printf("Select Params: student_id=%d, date=%s", studentID, time.Now().Format("2006-01-02"))
 		row := database.DB.QueryRow(query, studentID, time.Now().Format("2006-01-02"))
 		err := row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
 		if err != nil {
@@ -69,6 +74,7 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Check-in record not found for today", http.StatusNotFound)
 			return
 		}
+		log.Printf("Fetched attendance for check-out: %+v", attendance)
 
 		attendance.CheckOutLat = requestData.Latitude
 		attendance.CheckOutLong = requestData.Longitude
@@ -76,12 +82,15 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("Updating existing record with check-out data")
 		updateQuery := `UPDATE attendance SET check_out_lat = $1, check_out_long = $2, check_out_date_time = $3 WHERE id = $4`
+		log.Printf("Update Query: %s", updateQuery)
+		log.Printf("Update Params: lat=%f, long=%f, datetime=%v, id=%d", attendance.CheckOutLat, attendance.CheckOutLong, attendance.CheckOutDateTime, attendance.ID)
 		_, err = database.DB.Exec(updateQuery, attendance.CheckOutLat, attendance.CheckOutLong, attendance.CheckOutDateTime, attendance.ID)
 		if err != nil {
 			log.Printf("Failed to save record: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		log.Printf("Check-out updated for record ID: %d", attendance.ID)
 	}
 
 	log.Println("Successfully processed request, sending response")

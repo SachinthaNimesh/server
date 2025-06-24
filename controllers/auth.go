@@ -179,15 +179,16 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 // ValidateOTP checks if an OTP is valid and returns student_id and a new secret code
 func (s *AuthService) ValidateOTP(otpCode string) (*models.OTPValidationResponse, error) {
 	var otp models.OTP
-	err := s.db.QueryRow("SELECT student_id, is_used, expires_at FROM otps WHERE otp_code = ?", otpCode).Scan(&otp.StudentID, &otp.IsUsed, &otp.ExpiresAt)
+	log.Printf("Validating OTP: %s", otpCode) // Add debug log
+	err := s.db.QueryRow("SELECT student_id, is_used, expires_at FROM otps WHERE otp_code = $1", otpCode).Scan(&otp.StudentID, &otp.IsUsed, &otp.ExpiresAt)
 	if errors.Is(err, sql.ErrNoRows) {
-		log.Printf("OTP not found for code: %s", otpCode) // Improved logging
+		log.Printf("OTP not found for code: %s", otpCode)
 		return &models.OTPValidationResponse{
 			Success: false,
 			Message: "Invalid OTP",
 		}, nil
 	} else if err != nil {
-		log.Printf("Database error while fetching OTP for code %s: %v", otpCode, err) // Improved logging
+		log.Printf("Database error while fetching OTP for code %s: %v", otpCode, err)
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
