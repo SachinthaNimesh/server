@@ -8,14 +8,14 @@ import (
 
 // Response struct for the joined data
 type StudentEmployerSupervisor struct {
-	StudentID               uint   `json:"student_id"`
-	StudentFirstName        string `json:"student_first_name"`
-	StudentLastName         string `json:"student_last_name"`
-	EmployerName            string `json:"employer_name"`
-	EmployerContactNumber   string `json:"employer_contact_number"`
-	SupervisorFirstName     string `json:"supervisor_first_name"`
-	SupervisorLastName      string `json:"supervisor_last_name"`
-	SupervisorContactNumber string `json:"supervisor_contact_number"`
+	StudentID               uint    `json:"student_id"`
+	StudentFirstName        string  `json:"student_first_name"`
+	StudentLastName         *string `json:"student_last_name"`
+	EmployerName            *string `json:"employer_name"`
+	EmployerContactNumber   *string `json:"employer_contact_number"`
+	SupervisorFirstName     *string `json:"supervisor_first_name"`
+	SupervisorLastName      *string `json:"supervisor_last_name"`
+	SupervisorContactNumber *string `json:"supervisor_contact_number"`
 }
 
 // Handler to get the joined data
