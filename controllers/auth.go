@@ -114,7 +114,7 @@ func (s *AuthService) HandleVerifyDeviceAuth(w http.ResponseWriter, r *http.Requ
 func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	// Check if student exists
 	var count int64
-	err := s.db.QueryRow("SELECT COUNT(*) FROM students WHERE id = ?", studentID).Scan(&count)
+	err := s.db.QueryRow("SELECT COUNT(*) FROM student WHERE id = $1", studentID).Scan(&count)
 	if err != nil {
 		log.Printf("Database error while checking student existence: %v", err)
 		return nil, fmt.Errorf("database error: %w", err)
@@ -125,7 +125,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 
 	// Check if there's an existing unused OTP that hasn't expired
 	var existingOTP models.OTP
-	err = s.db.QueryRow("SELECT otp_code, expires_at FROM otps WHERE student_id = ? AND is_used = false AND expires_at > CURRENT_TIMESTAMP", studentID).Scan(&existingOTP.OTPCode, &existingOTP.ExpiresAt)
+	err = s.db.QueryRow("SELECT otp_code, expires_at FROM otps WHERE student_id = $1 AND is_used = false AND expires_at > CURRENT_TIMESTAMP", studentID).Scan(&existingOTP.OTPCode, &existingOTP.ExpiresAt)
 	if err == nil {
 		log.Printf("An unused OTP already exists for student ID %d", studentID)
 		return &models.OTPResponse{
@@ -135,7 +135,7 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 		}, nil
 	} else if errors.Is(err, sql.ErrNoRows) {
 		// Mark expired OTPs as used
-		_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = ? AND is_used = false AND expires_at <= CURRENT_TIMESTAMP", studentID)
+		_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = $1 AND is_used = false AND expires_at <= CURRENT_TIMESTAMP", studentID)
 		if err != nil {
 			log.Printf("Error marking expired OTPs as used for student ID %d: %v", studentID, err)
 			return nil, fmt.Errorf("failed to update expired OTPs: %w", err)
@@ -156,20 +156,14 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 	expiresAt := time.Now().Add(30 * time.Minute)
 
 	// Invalidate any existing unused OTPs for this student
-	_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = ? AND is_used = false", studentID)
+	_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = $1 AND is_used = false", studentID)
 	if err != nil {
 		log.Printf("Error invalidating existing OTPs: %v", err)
 		return nil, fmt.Errorf("failed to invalidate existing OTPs: %w", err)
 	}
 
 	// Insert new OTP
-	newOTP := models.OTP{
-		StudentID: studentID,
-		OTPCode:   otp,
-		ExpiresAt: expiresAt,
-		IsUsed:    false,
-	}
-	err = s.db.QueryRow("INSERT INTO otps (student_id, otp_code, expires_at, is_used) VALUES (?, ?, ?, ?) RETURNING otp_code", studentID, otp, expiresAt, false).Scan(&newOTP.OTPCode)
+	_, err = s.db.Exec("INSERT INTO otps (student_id, otp_code, expires_at, is_used) VALUES ($1, $2, $3, $4)", studentID, otp, expiresAt, false)
 	if err != nil {
 		log.Printf("Error storing new OTP: %v", err)
 		return nil, fmt.Errorf("failed to store OTP: %w", err)
