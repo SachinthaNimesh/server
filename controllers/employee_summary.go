@@ -1,15 +1,13 @@
 package controllers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
 	"server/database"
-	"server/models"
-
-	"gorm.io/gorm"
 )
 
 type Attendance struct {
@@ -40,51 +38,69 @@ func GetEmployeeSummary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var summary EmployeeSummary
+	summary := EmployeeSummary{}
 
 	// 1. Last 5 attendance records (before today)
-	var attendances []models.Attendance
-	if err := database.DB.
-		Where("student_id = ? AND DATE(check_in_date_time) < CURRENT_DATE", studentID).
-		Order("check_in_date_time DESC").
-		Limit(5).
-		Find(&attendances).Error; err != nil && err != gorm.ErrRecordNotFound {
+	rows, err := database.DB.Query(
+		`SELECT check_in_date_time, check_out_date_time FROM attendance WHERE student_id = $1 AND DATE(check_in_date_time) < CURRENT_DATE ORDER BY check_in_date_time DESC LIMIT 5`,
+		studentID,
+	)
+	if err != nil {
 		http.Error(w, `{"error":"Failed to fetch attendance"}`, http.StatusInternalServerError)
 		return
 	}
-	for _, att := range attendances {
-		summary.Attendances = append(summary.Attendances, Attendance{
-			CheckIn:  att.CheckInDateTime,
-			CheckOut: &att.CheckOutDateTime,
-		})
+	defer rows.Close()
+	for rows.Next() {
+		var att Attendance
+		var checkOut sql.NullTime
+		if err := rows.Scan(&att.CheckIn, &checkOut); err != nil {
+			http.Error(w, `{"error":"Failed to scan attendance"}`, http.StatusInternalServerError)
+			return
+		}
+		if checkOut.Valid {
+			att.CheckOut = &checkOut.Time
+		}
+		summary.Attendances = append(summary.Attendances, att)
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, `{"error":"Failed to fetch attendance"}`, http.StatusInternalServerError)
+		return
 	}
 
 	// 2. Remarks
-	var student models.Student
-	if err := database.DB.Select("remarks").First(&student, studentID).Error; err != nil && err != gorm.ErrRecordNotFound {
+	var remarks sql.NullString
+	err = database.DB.QueryRow(`SELECT remarks FROM student WHERE id = $1`, studentID).Scan(&remarks)
+	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, `{"error":"Failed to fetch remarks"}`, http.StatusInternalServerError)
 		return
 	}
-	summary.Remarks = student.Remarks
+	if remarks.Valid {
+		summary.Remarks = remarks.String
+	}
 
 	// 3. Last 5 daily mood entries
-	var moods []models.Mood
-	if err := database.DB.
-		Where("student_id = ? AND is_daily = ?", studentID, true).
-		Order("recorded_at ASC").
-		Limit(5).
-		Find(&moods).Error; err != nil && err != gorm.ErrRecordNotFound {
+	rows, err = database.DB.Query(
+		`SELECT emotion, recorded_at FROM mood WHERE student_id = $1 AND is_daily = true ORDER BY recorded_at ASC LIMIT 5`,
+		studentID,
+	)
+	if err != nil {
 		http.Error(w, `{"error":"Failed to fetch moods"}`, http.StatusInternalServerError)
 		return
 	}
-	for _, m := range moods {
-		summary.Moods = append(summary.Moods, Mood{
-			Emotion:    m.Emotion,
-			RecordedAt: m.RecordedAt,
-		})
+	defer rows.Close()
+	for rows.Next() {
+		var m Mood
+		if err := rows.Scan(&m.Emotion, &m.RecordedAt); err != nil {
+			http.Error(w, `{"error":"Failed to scan moods"}`, http.StatusInternalServerError)
+			return
+		}
+		summary.Moods = append(summary.Moods, m)
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, `{"error":"Failed to fetch moods"}`, http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
 	json.NewEncoder(w).Encode(summary)
 }

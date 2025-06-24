@@ -22,9 +22,19 @@ import (
 // @Router /moods [get]
 func GetMoods(w http.ResponseWriter, r *http.Request) {
 	var moods []models.Mood
-	if err := database.DB.Find(&moods).Error; err != nil {
+	rows, err := database.DB.Query("SELECT id, student_id, recorded_at, emotion, is_daily FROM mood")
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var m models.Mood
+		if err := rows.Scan(&m.ID, &m.StudentID, &m.RecordedAt, &m.Emotion, &m.IsDaily); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		moods = append(moods, m)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(moods)
@@ -46,19 +56,17 @@ func GetMood(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
-
 	studentID, err := strconv.Atoi(StudentIDHeader)
 	if err != nil {
 		log.Printf("Invalid student-id header: %v", err)
 		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
 		return
 	}
-
 	vars := mux.Vars(r)
 	id := vars["id"]
-
 	var mood models.Mood
-	if err := database.DB.Where("id = ? AND student_id = ?", id, studentID).First(&mood).Error; err != nil {
+	err = database.DB.QueryRow("SELECT id, student_id, recorded_at, emotion, is_daily FROM mood WHERE id = $1 AND student_id = $2", id, studentID).Scan(&mood.ID, &mood.StudentID, &mood.RecordedAt, &mood.Emotion, &mood.IsDaily)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -84,14 +92,12 @@ func CreateMood(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing student-id header", http.StatusBadRequest)
 		return
 	}
-
 	studentID, err := strconv.Atoi(StudentIDHeader)
 	if err != nil {
 		log.Printf("Invalid student-id header: %v", err)
 		http.Error(w, "Invalid student-id header", http.StatusBadRequest)
 		return
 	}
-
 	var payload struct {
 		Emotion string `json:"emotion"`
 		IsDaily bool   `json:"is_daily"`
@@ -100,20 +106,19 @@ func CreateMood(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	mood := models.Mood{
 		StudentID:  studentID,
 		Emotion:    payload.Emotion,
 		IsDaily:    payload.IsDaily,
 		RecordedAt: time.Now(),
 	}
-
-	if err := database.DB.Create(&mood).Error; err != nil {
+	query := "INSERT INTO mood (student_id, emotion, is_daily, recorded_at) VALUES ($1, $2, $3, $4) RETURNING id"
+	err = database.DB.QueryRow(query, mood.StudentID, mood.Emotion, mood.IsDaily, mood.RecordedAt).Scan(&mood.ID)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Printf("Error creating mood: %v", err)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(mood)
 }

@@ -21,9 +21,19 @@ import (
 // @Router /supervisors [get]
 func GetSupervisors(w http.ResponseWriter, r *http.Request) {
 	var supervisors []models.Supervisor
-	if err := database.DB.Find(&supervisors).Error; err != nil {
+	rows, err := database.DB.Query("SELECT supervisor_id, student_id, first_name, last_name, email_address, contact_number FROM supervisor")
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var s models.Supervisor
+		if err := rows.Scan(&s.SupervisorID, &s.StudentID, &s.FirstName, &s.LastName, &s.EmailAddress, &s.ContactNumber); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		supervisors = append(supervisors, s)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(supervisors)
@@ -46,14 +56,14 @@ func GetSupervisor(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid supervisor ID", http.StatusBadRequest)
 		return
 	}
-
-	var supervisor models.Supervisor
-	if err := database.DB.First(&supervisor, id).Error; err != nil {
+	var s models.Supervisor
+	err = database.DB.QueryRow("SELECT supervisor_id, student_id, first_name, last_name, email_address, contact_number FROM supervisor WHERE supervisor_id = $1", id).Scan(&s.SupervisorID, &s.StudentID, &s.FirstName, &s.LastName, &s.EmailAddress, &s.ContactNumber)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(supervisor)
+	json.NewEncoder(w).Encode(s)
 }
 
 // CreateSupervisor godoc
@@ -68,18 +78,19 @@ func GetSupervisor(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Internal Server Error"
 // @Router /supervisors [post]
 func CreateSupervisor(w http.ResponseWriter, r *http.Request) {
-	var supervisor models.Supervisor
-	if err := json.NewDecoder(r.Body).Decode(&supervisor); err != nil {
+	var s models.Supervisor
+	if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	if err := database.DB.Create(&supervisor).Error; err != nil {
+	query := `INSERT INTO supervisor (student_id, first_name, last_name, email_address, contact_number) VALUES ($1, $2, $3, $4, $5) RETURNING supervisor_id`
+	err := database.DB.QueryRow(query, s.StudentID, s.FirstName, s.LastName, s.EmailAddress, s.ContactNumber).Scan(&s.SupervisorID)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(supervisor)
+	json.NewEncoder(w).Encode(s)
 }
 
 // UpdateSupervisor godoc
@@ -102,24 +113,20 @@ func UpdateSupervisor(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid supervisor ID", http.StatusBadRequest)
 		return
 	}
-
-	var supervisor models.Supervisor
-	if err := database.DB.First(&supervisor, id).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&supervisor); err != nil {
+	var s models.Supervisor
+	if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	if err := database.DB.Save(&supervisor).Error; err != nil {
+	query := `UPDATE supervisor SET student_id=$1, first_name=$2, last_name=$3, email_address=$4, contact_number=$5 WHERE supervisor_id=$6`
+	_, err = database.DB.Exec(query, s.StudentID, s.FirstName, s.LastName, s.EmailAddress, s.ContactNumber, id)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.SupervisorID = id
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(supervisor)
+	json.NewEncoder(w).Encode(s)
 }
 
 // DeleteSupervisor godoc
@@ -138,8 +145,8 @@ func DeleteSupervisor(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid supervisor ID", http.StatusBadRequest)
 		return
 	}
-
-	if err := database.DB.Delete(&models.Supervisor{}, id).Error; err != nil {
+	_, err = database.DB.Exec("DELETE FROM supervisor WHERE supervisor_id = $1", id)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -159,10 +166,20 @@ func GetAllSupervisorIDsAndNames(w http.ResponseWriter, r *http.Request) {
 		FirstName    string `json:"first_name"`
 		LastName     string `json:"last_name"`
 	}
-	var supervisors []SupervisorIDName
-	if err := database.DB.Table("supervisor").Select("supervisor_id, first_name, last_name").Scan(&supervisors).Error; err != nil {
+	rows, err := database.DB.Query("SELECT supervisor_id, first_name, last_name FROM supervisor")
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	defer rows.Close()
+	var supervisors []SupervisorIDName
+	for rows.Next() {
+		var s SupervisorIDName
+		if err := rows.Scan(&s.SupervisorID, &s.FirstName, &s.LastName); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		supervisors = append(supervisors, s)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(supervisors)

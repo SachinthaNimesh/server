@@ -52,9 +52,32 @@ func GetEmployeeData(w http.ResponseWriter, r *http.Request) {
 		) o ON true;
 	`
 
-	if err := database.DB.Raw(query).Scan(&results).Error; err != nil {
+	rows, err := database.DB.Query(query)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var res EmployeeResponse
+		if err := rows.Scan(
+			&res.StudentID,
+			&res.StudentName,
+			&res.StudentContact,
+			&res.EmployerID,
+			&res.EmployerName,
+			&res.EmployerContact,
+			&res.EmployerAddress,
+			&res.SupervisorID,
+			&res.SupervisorName,
+			&res.LatestOTPCode,
+			&res.ExpiresAt,
+		); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		results = append(results, res)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

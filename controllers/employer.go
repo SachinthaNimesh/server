@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -9,7 +10,6 @@ import (
 	"server/models"
 
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 )
 
 // CreateEmployer godoc
@@ -49,17 +49,13 @@ func CreateEmployer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	employer := models.Employer{
-		Name:          employerInput.Name,
-		StudentID:     employerInput.StudentID,
-		ContactNumber: employerInput.ContactNumber,
-		AddressLine1:  employerInput.AddressLine1,
-		AddressLine2:  employerInput.AddressLine2,
-		AddressLine3:  employerInput.AddressLine3,
-		Longitude:     employerInput.Longitude,
-		Latitude:      employerInput.Latitude,
-	}
-	if err := database.DB.Create(&employer).Error; err != nil {
+	var employer models.Employer
+	err := database.DB.QueryRow(
+		`INSERT INTO employer (name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat`,
+		employerInput.Name, employerInput.StudentID, employerInput.ContactNumber, employerInput.AddressLine1, employerInput.AddressLine2, employerInput.AddressLine3, employerInput.Longitude, employerInput.Latitude,
+	).Scan(&employer.ID, &employer.Name, &employer.StudentID, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -85,17 +81,18 @@ func GetEmployer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
-
 	var employer models.Employer
-	if err := database.DB.First(&employer, id).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			http.Error(w, "Employer not found", http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+	err = database.DB.QueryRow(
+		`SELECT id, name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat FROM employer WHERE id = $1`,
+		id,
+	).Scan(&employer.ID, &employer.Name, &employer.StudentID, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Employer not found", http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(employer)
 }
@@ -131,17 +128,6 @@ func UpdateEmployer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
-
-	var employer models.Employer
-	if err := database.DB.First(&employer, id).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			http.Error(w, "Employer not found", http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		return
-	}
-
 	var employerInput struct {
 		Name          string  `json:"name"`
 		StudentID     int     `json:"student_id"`
@@ -156,21 +142,29 @@ func UpdateEmployer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	employer.Name = employerInput.Name
-	employer.StudentID = employerInput.StudentID
-	employer.ContactNumber = employerInput.ContactNumber
-	employer.AddressLine1 = employerInput.AddressLine1
-	employer.AddressLine2 = employerInput.AddressLine2
-	employer.AddressLine3 = employerInput.AddressLine3
-	employer.Longitude = employerInput.Longitude
-	employer.Latitude = employerInput.Latitude
-
-	if err := database.DB.Save(&employer).Error; err != nil {
+	res, err := database.DB.Exec(
+		`UPDATE employer SET name = $1, student_id = $2, contact_number = $3, address_line1 = $4, address_line2 = $5, address_line3 = $6, addr_long = $7, addr_lat = $8 WHERE id = $9`,
+		employerInput.Name, employerInput.StudentID, employerInput.ContactNumber, employerInput.AddressLine1, employerInput.AddressLine2, employerInput.AddressLine3, employerInput.Longitude, employerInput.Latitude, id,
+	)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		http.Error(w, "Employer not found", http.StatusNotFound)
+		return
+	}
+	// Return the updated employer
+	var employer models.Employer
+	err = database.DB.QueryRow(
+		`SELECT id, name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat FROM employer WHERE id = $1`,
+		id,
+	).Scan(&employer.ID, &employer.Name, &employer.StudentID, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(employer)
 }
@@ -191,12 +185,16 @@ func DeleteEmployer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
-
-	if err := database.DB.Delete(&models.Employer{}, id).Error; err != nil {
+	res, err := database.DB.Exec(`DELETE FROM employer WHERE id = $1`, id)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		http.Error(w, "Employer not found", http.StatusNotFound)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -212,8 +210,22 @@ func GetAllEmployerIDsAndNames(w http.ResponseWriter, r *http.Request) {
 		ID   uint64 `json:"id"`
 		Name string `json:"name"`
 	}
+	rows, err := database.DB.Query(`SELECT id, name FROM employer`)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
 	var employers []EmployerIDName
-	if err := database.DB.Table("employer").Select("id, name").Scan(&employers).Error; err != nil {
+	for rows.Next() {
+		var e EmployerIDName
+		if err := rows.Scan(&e.ID, &e.Name); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		employers = append(employers, e)
+	}
+	if err := rows.Err(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

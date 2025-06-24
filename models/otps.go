@@ -6,12 +6,12 @@ import (
 
 // OTP represents an OTP code for authentication
 type OTP struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	StudentID int       `json:"student_id" gorm:"not null;column:student_id"`
-	OTPCode   string    `json:"otp_code" gorm:"not null;column:otp_code"`
-	CreatedAt time.Time `json:"created_at" gorm:"not null;column:created_at"`
-	ExpiresAt time.Time `json:"expires_at" gorm:"not null;column:expires_at"`
-	IsUsed    bool      `json:"is_used" gorm:"not null;column:is_used"`
+	ID        uint      `json:"id"`
+	StudentID int       `json:"student_id"`
+	OTPCode   string    `json:"otp_code"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
+	IsUsed    bool      `json:"is_used"`
 }
 
 // OTPRequest is used for OTP generation <@WEB DASHBOARD>
@@ -37,8 +37,4 @@ type OTPValidationResponse struct {
 	StudentID  int    `json:"student_id"`
 	SecretCode string `json:"secret_code,omitempty"`
 	Message    string `json:"message,omitempty"`
-}
-
-func (OTP) TableName() string {
-	return "otps"
 }
