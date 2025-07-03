@@ -5,12 +5,17 @@ info:
   version: 1.0.0
 servers:
   - url: https://87e89eab-95e5-4c0f-8192-7ee0196e1581-dev.e1-us-east-azure.choreoapis.dev/employee-mgmt-system/student-mgmt-server/v1.0
+security:
+  - OAuth2: []
+  - {}
 paths:
   /post-mood:
     post:
       summary: Create a new mood
       tags:
         - moods
+      security:
+        - {}
       requestBody:
         required: true
         content:
@@ -107,6 +112,8 @@ paths:
       summary: Get a student by ID
       tags:
         - students
+      security:
+        - {}
       parameters:
         - name: student-id
           in: header
@@ -219,6 +226,8 @@ paths:
       description: Generate a new OTP for a student
       tags:
         - authentication
+      security:
+        - OAuth2: []
       parameters:
         - name: student-id
           in: header
@@ -261,6 +270,8 @@ paths:
       description: Validate an OTP and generate a secret code
       tags:
         - authentication
+      security:
+        - {}
       parameters:
         - name: otp-code
           in: header
@@ -303,6 +314,8 @@ paths:
       description: Verify if a device is authorized using student ID and secret code
       tags:
         - authentication
+      security:
+        - {}
       requestBody:
         required: true
         content:
@@ -411,6 +424,8 @@ paths:
       description: Handles check-in and check-out attendance records for students.
       tags:
         - attendance
+      security:
+        - {}
       requestBody:
         required: true
         content:
@@ -569,7 +584,6 @@ paths:
           description: Bad Request
         "500":
           description: Internal Server Error
-
   /update-employee:
     put:
       summary: Update an employee by student-id header
@@ -606,7 +620,6 @@ paths:
           description: Student not found
         "500":
           description: Internal Server Error
-
   /delete-employee:
     delete:
       summary: Delete an employee by student-id header
