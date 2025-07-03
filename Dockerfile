@@ -1,15 +1,30 @@
-FROM golang:1.24.0
+# Use a minimal Go base image
+FROM golang:1.22-alpine AS builder
 
+# Set the working directory inside the container
 WORKDIR /app
 
-COPY go.* ./
-
+# Copy go.mod and go.sum and download dependencies
+COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy the source code
 COPY . .
 
-RUN go build -o main main.go
+# Build the Go application
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
+# Use a minimal image for the final stage
+FROM alpine:latest
+
+# Set the working directory
+WORKDIR /root/
+
+# Copy the built executable from the builder stage
+COPY --from=builder /app/main .
+
+# Expose the port your application listens on (if applicable)
 EXPOSE 8080
 
+# Run the executable
 CMD ["./main"]
