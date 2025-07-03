@@ -11,8 +11,6 @@ paths:
       summary: Create a new mood
       tags:
         - moods
-      security:
-        - OAuth2: []
       requestBody:
         required: true
         content:
@@ -109,8 +107,6 @@ paths:
       summary: Get a student by ID
       tags:
         - students
-      security:
-        - OAuth2: []
       parameters:
         - name: student-id
           in: header
@@ -415,8 +411,6 @@ paths:
       description: Handles check-in and check-out attendance records for students.
       tags:
         - attendance
-      security:
-        - OAuth2: []
       requestBody:
         required: true
         content:
@@ -945,6 +939,12 @@ components:
                 example: "18:30:00"
               actual_check_in:
                 type: string
+                format: date-time
+                example: "2025-06-01T10:35:12Z"
+              actual_check_out:
+                type: string
+                format: date-time
+                example: "2025-06-01T18:25:45Z"
                 format: date-time
                 example: "2025-06-01T10:35:12Z"
               actual_check_out:
