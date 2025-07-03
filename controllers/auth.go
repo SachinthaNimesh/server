@@ -123,26 +123,11 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 		return nil, errors.New("student not found")
 	}
 
-	// Check if there's an existing unused OTP that hasn't expired
-	var existingOTP models.OTP
-	err = s.db.QueryRow("SELECT otp_code, expires_at FROM otps WHERE student_id = $1 AND is_used = false AND expires_at > CURRENT_TIMESTAMP", studentID).Scan(&existingOTP.OTPCode, &existingOTP.ExpiresAt)
-	if err == nil {
-		log.Printf("An unused OTP already exists for student ID %d", studentID)
-		return &models.OTPResponse{
-			StudentID: studentID,
-			OTPCode:   existingOTP.OTPCode,
-			ExpiresAt: existingOTP.ExpiresAt,
-		}, nil
-	} else if errors.Is(err, sql.ErrNoRows) {
-		// Mark expired OTPs as used
-		_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = $1 AND is_used = false AND expires_at <= CURRENT_TIMESTAMP", studentID)
-		if err != nil {
-			log.Printf("Error marking expired OTPs as used for student ID %d: %v", studentID, err)
-			return nil, fmt.Errorf("failed to update expired OTPs: %w", err)
-		}
-	} else {
-		log.Printf("Database error while checking existing OTP for student ID %d: %v", studentID, err)
-		return nil, fmt.Errorf("database error: %w", err)
+	// Invalidate any existing unused OTPs for this student (mark expired ones as used)
+	_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = $1 AND is_used = false", studentID)
+	if err != nil {
+		log.Printf("Error invalidating existing OTPs for student ID %d: %v", studentID, err)
+		return nil, fmt.Errorf("failed to invalidate existing OTPs: %w", err)
 	}
 
 	// Generate a random 4-digit OTP
@@ -154,13 +139,6 @@ func (s *AuthService) GenerateOTP(studentID int) (*models.OTPResponse, error) {
 
 	// Set expiration time (30 minutes from now)
 	expiresAt := time.Now().Add(30 * time.Minute)
-
-	// Invalidate any existing unused OTPs for this student
-	_, err = s.db.Exec("UPDATE otps SET is_used = true WHERE student_id = $1 AND is_used = false", studentID)
-	if err != nil {
-		log.Printf("Error invalidating existing OTPs: %v", err)
-		return nil, fmt.Errorf("failed to invalidate existing OTPs: %w", err)
-	}
 
 	// Insert new OTP
 	_, err = s.db.Exec("INSERT INTO otps (student_id, otp_code, expires_at, is_used) VALUES ($1, $2, $3, $4)", studentID, otp, expiresAt, false)

@@ -945,9 +945,3 @@ components:
                 type: string
                 format: date-time
                 example: "2025-06-01T18:25:45Z"
-                format: date-time
-                example: "2025-06-01T10:35:12Z"
-              actual_check_out:
-                type: string
-                format: date-time
-                example: "2025-06-01T18:25:45Z"
