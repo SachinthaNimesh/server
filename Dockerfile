@@ -17,18 +17,23 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 # Use a minimal image for the final stage
 FROM alpine:latest
 
-# Set the working directory
-WORKDIR /root/
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates
 
 # Create a non-root user with a specific UID (e.g., 10014)
 RUN addgroup -g 10014 -S appgroup && adduser -u 10014 -S appuser -G appgroup
 
+# Create app directory and set proper ownership
+RUN mkdir -p /app && chown appuser:appgroup /app
+
+# Set the working directory
+WORKDIR /app
 
 # Copy the built executable from the builder stage
 COPY --from=builder /app/main .
 
 # Change ownership of the executable
-RUN chown appuser:appgroup /root/main
+RUN chown appuser:appgroup /app/main
 
 # Expose the port your application listens on (if applicable)
 EXPOSE 8080

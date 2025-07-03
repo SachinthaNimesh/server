@@ -11,6 +11,7 @@ paths:
       summary: Create a new mood
       tags:
         - moods
+      security: []
       requestBody:
         required: true
         content:
@@ -101,6 +102,7 @@ paths:
       summary: Get a student by ID
       tags:
         - students
+      security: []
       parameters:
         - name: student-id
           in: header
@@ -247,6 +249,7 @@ paths:
       description: Validate an OTP and generate a secret code
       tags:
         - authentication
+      security: []
       parameters:
         - name: otp-code
           in: header
@@ -283,48 +286,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /verify-device-auth:
-    post:
-      summary: Verify device authorization
-      description: Verify if a device is authorized using student ID and secret code
-      tags:
-        - authentication
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                student_id:
-                  type: integer
-                  example: 1
-                secret_code:
-                  type: string
-                  example: "abcd1234"
-      responses:
-        "200":
-          description: Device authorization verified successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  authorized:
-                    type: boolean
-                    example: true
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
   /employees:
     get:
       summary: Get all employees
@@ -345,54 +306,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /location:
-    post:
-      summary: Update location
-      description: Updates the location data for a student.
-      tags:
-        - location
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                longitude:
-                  type: number
-                  format: float
-                latitude:
-                  type: number
-                  format: float
-                address:
-                  type: string
-                studentId:
-                  type: number
-                  format: int64
-      responses:
-        "200":
-          description: Location updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Location data received"
-        "400":
-          description: Invalid request body
-        "401":
-          description: Unauthorized
   /attendance:
     post:
       summary: Create or update attendance record
       description: Handles check-in and check-out attendance records for students.
       tags:
         - attendance
+      security: []
       requestBody:
         required: true
         content:
@@ -860,6 +780,90 @@ components:
               type: string
               example: "123-456-7890"
             contact_number_guardian:
+              type: string
+              example: "098-765-4321"
+            remarks:
+              type: string
+              example: "Regular attendance"
+            employer_name:
+              type: string
+              example: "Acme Corp"
+        recent_moods:
+          type: array
+          items:
+            type: object
+            properties:
+              emotion:
+                type: string
+                example: "happy"
+              recorded_at:
+                type: string
+                format: date-time
+                example: "2025-06-01T09:30:00Z"
+              is_daily:
+                type: boolean
+                example: true
+        recent_attendance:
+          type: array
+          items:
+            type: object
+            properties:
+              scheduled_check_in:
+                type: string
+                example: "10:30:00"
+              scheduled_check_out:
+                type: string
+                example: "18:30:00"
+              actual_check_in:
+                type: string
+                format: date-time
+                example: "2025-06-01T10:35:12Z"
+              actual_check_out:
+                type: string
+                format: date-time
+                example: "2025-06-01T18:25:45Z"
+              type: string
+              example: "098-765-4321"
+            remarks:
+              type: string
+              example: "Regular attendance"
+            employer_name:
+              type: string
+              example: "Acme Corp"
+        recent_moods:
+          type: array
+          items:
+            type: object
+            properties:
+              emotion:
+                type: string
+                example: "happy"
+              recorded_at:
+                type: string
+                format: date-time
+                example: "2025-06-01T09:30:00Z"
+              is_daily:
+                type: boolean
+                example: true
+        recent_attendance:
+          type: array
+          items:
+            type: object
+            properties:
+              scheduled_check_in:
+                type: string
+                example: "10:30:00"
+              scheduled_check_out:
+                type: string
+                example: "18:30:00"
+              actual_check_in:
+                type: string
+                format: date-time
+                example: "2025-06-01T10:35:12Z"
+              actual_check_out:
+                type: string
+                format: date-time
+                example: "2025-06-01T18:25:45Z"
               type: string
               example: "098-765-4321"
             remarks:
