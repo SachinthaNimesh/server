@@ -5,6 +5,354 @@ info:
   version: 1.0.0
 servers:
   - url: https://87e89eab-95e5-4c0f-8192-7ee0196e1581-dev.e1-us-east-azure.choreoapis.dev/employee-mgmt-system/student-mgmt-server/v1.0
+security:
+  - OAuth2: []
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth2/authorize
+          tokenUrl: https://example.com/oauth2/token
+          scopes: {}
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: api-key
+  schemas:
+    Mood:
+      type: object
+      properties:
+        emotion:
+          type: string
+        id:
+          type: integer
+        is_daily:
+          type: boolean
+        recorded_at:
+          type: string
+        student_id:
+          type: integer
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        first_name:
+          type: string
+        last_name:
+          type: string
+        dob:
+          type: string
+          format: date-time
+        gender:
+          type: string
+        address_line1:
+          type: string
+        address_line2:
+          type: string
+        city:
+          type: string
+        contact_number:
+          type: string
+        contact_number_guardian:
+          type: string
+        supervisor_id:
+          type: integer
+          nullable: true
+        remarks:
+          type: string
+        home_long:
+          type: number
+          format: float
+        home_lat:
+          type: number
+          format: float
+        employer_id:
+          type: integer
+          nullable: true
+        check_in_time:
+          type: string
+        check_out_time:
+          type: string
+    Attendance:
+      type: object
+      properties:
+        id:
+          type: integer
+        student_id:
+          type: integer
+        date:
+          type: string
+        status:
+          type: string
+    StudentDetailedResponse:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          format: int64
+          example: 12345
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        employer_name:
+          type: string
+          example: "Acme Corp"
+        check_in_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T08:30:00Z"
+        check_out_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T17:30:00Z"
+        emotion:
+          type: string
+          example: "happy"
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Failed to retrieve student data"
+    StudentCard:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          format: int64
+          example: 12345
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        employer_name:
+          type: string
+          nullable: true
+          example: "Acme Corp"
+        check_in_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T08:30:00Z"
+        check_out_date_time:
+          type: string
+          format: date-time
+          example: "2023-05-01T17:30:00Z"
+        emotion:
+          type: string
+          example: "happy"
+    OTPResponse:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          example: 1
+        otp_code:
+          type: string
+          example: "1234"
+        expires_at:
+          type: string
+          format: date-time
+          example: "2025-04-30T15:30:00Z"
+    OTPValidationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Authentication successful"
+        token:
+          type: string
+          example: "abcd1234"
+    Employee:
+      type: object
+      properties:
+        student_id:
+          type: integer
+        student_name:
+          type: string
+        student_contact:
+          type: string
+        employer_id:
+          type: integer
+          nullable: true
+        employer_name:
+          type: string
+          nullable: true
+        employer_contact:
+          type: string
+          nullable: true
+        employer_address:
+          type: string
+          nullable: true
+        supervisor_id:
+          type: integer
+          nullable: true
+        supervisor_name:
+          type: string
+          nullable: true
+        latest_otp_code:
+          type: string
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+    TraineeProfileResponse:
+      type: object
+      properties:
+        student_info:
+          type: object
+          properties:
+            first_name:
+              type: string
+              example: "John"
+            last_name:
+              type: string
+              example: "Doe"
+            gender:
+              type: string
+              example: "Male"
+            contact_number:
+              type: string
+              example: "123-456-7890"
+            contact_number_guardian:
+              type: string
+              example: "098-765-4321"
+            remarks:
+              type: string
+              example: "Regular attendance"
+            employer_name:
+              type: string
+              example: "Acme Corp"
+        recent_moods:
+          type: array
+          items:
+            type: object
+            properties:
+              emotion:
+                type: string
+                example: "happy"
+              recorded_at:
+                type: string
+                format: date-time
+                example: "2025-06-01T09:30:00Z"
+              is_daily:
+                type: boolean
+                example: true
+        recent_attendance:
+          type: array
+          items:
+            type: object
+            properties:
+              scheduled_check_in:
+                type: string
+                example: "10:30:00"
+              scheduled_check_out:
+                type: string
+                example: "18:30:00"
+              actual_check_in:
+                type: string
+                format: date-time
+                example: "2025-06-01T10:35:12Z"
+              actual_check_out:
+                type: string
+                format: date-time
+                example: "2025-06-01T18:25:45Z"
+              type: string
+              example: "098-765-4321"
+            remarks:
+              type: string
+              example: "Regular attendance"
+            employer_name:
+              type: string
+              example: "Acme Corp"
+        recent_moods:
+          type: array
+          items:
+            type: object
+            properties:
+              emotion:
+                type: string
+                example: "happy"
+              recorded_at:
+                type: string
+                format: date-time
+                example: "2025-06-01T09:30:00Z"
+              is_daily:
+                type: boolean
+                example: true
+        recent_attendance:
+          type: array
+          items:
+            type: object
+            properties:
+              scheduled_check_in:
+                type: string
+                example: "10:30:00"
+              scheduled_check_out:
+                type: string
+                example: "18:30:00"
+              actual_check_in:
+                type: string
+                format: date-time
+                example: "2025-06-01T10:35:12Z"
+              actual_check_out:
+                type: string
+                format: date-time
+                example: "2025-06-01T18:25:45Z"
+              type: string
+              example: "098-765-4321"
+            remarks:
+              type: string
+              example: "Regular attendance"
+            employer_name:
+              type: string
+              example: "Acme Corp"
+        recent_moods:
+          type: array
+          items:
+            type: object
+            properties:
+              emotion:
+                type: string
+                example: "happy"
+              recorded_at:
+                type: string
+                format: date-time
+                example: "2025-06-01T09:30:00Z"
+              is_daily:
+                type: boolean
+                example: true
+        recent_attendance:
+          type: array
+          items:
+            type: object
+            properties:
+              scheduled_check_in:
+                type: string
+                example: "10:30:00"
+              scheduled_check_out:
+                type: string
+                example: "18:30:00"
+              actual_check_in:
+                type: string
+                format: date-time
+                example: "2025-06-01T10:35:12Z"
+              actual_check_out:
+                type: string
+                format: date-time
+                example: "2025-06-01T18:25:45Z"
 paths:
   /post-mood:
     post:
@@ -572,337 +920,3 @@ paths:
                       type: string
                     last_name:
                       type: string
-components:
-  schemas:
-    Mood:
-      type: object
-      properties:
-        emotion:
-          type: string
-        id:
-          type: integer
-        is_daily:
-          type: boolean
-        recorded_at:
-          type: string
-        student_id:
-          type: integer
-    Student:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        first_name:
-          type: string
-        last_name:
-          type: string
-        dob:
-          type: string
-          format: date-time
-        gender:
-          type: string
-        address_line1:
-          type: string
-        address_line2:
-          type: string
-        city:
-          type: string
-        contact_number:
-          type: string
-        contact_number_guardian:
-          type: string
-        supervisor_id:
-          type: integer
-          nullable: true
-        remarks:
-          type: string
-        home_long:
-          type: number
-          format: float
-        home_lat:
-          type: number
-          format: float
-        employer_id:
-          type: integer
-          nullable: true
-        check_in_time:
-          type: string
-        check_out_time:
-          type: string
-    Attendance:
-      type: object
-      properties:
-        id:
-          type: integer
-        student_id:
-          type: integer
-        date:
-          type: string
-        status:
-          type: string
-    StudentDetailedResponse:
-      type: object
-      properties:
-        student_id:
-          type: integer
-          format: int64
-          example: 12345
-        first_name:
-          type: string
-          example: "John"
-        last_name:
-          type: string
-          example: "Doe"
-        employer_name:
-          type: string
-          example: "Acme Corp"
-        check_in_date_time:
-          type: string
-          format: date-time
-          example: "2023-05-01T08:30:00Z"
-        check_out_date_time:
-          type: string
-          format: date-time
-          example: "2023-05-01T17:30:00Z"
-        emotion:
-          type: string
-          example: "happy"
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          type: string
-          example: "Failed to retrieve student data"
-    StudentCard:
-      type: object
-      properties:
-        student_id:
-          type: integer
-          format: int64
-          example: 12345
-        first_name:
-          type: string
-          example: "John"
-        last_name:
-          type: string
-          example: "Doe"
-        employer_name:
-          type: string
-          nullable: true
-          example: "Acme Corp"
-        check_in_date_time:
-          type: string
-          format: date-time
-          example: "2023-05-01T08:30:00Z"
-        check_out_date_time:
-          type: string
-          format: date-time
-          example: "2023-05-01T17:30:00Z"
-        emotion:
-          type: string
-          example: "happy"
-    OTPResponse:
-      type: object
-      properties:
-        student_id:
-          type: integer
-          example: 1
-        otp_code:
-          type: string
-          example: "1234"
-        expires_at:
-          type: string
-          format: date-time
-          example: "2025-04-30T15:30:00Z"
-    OTPValidationResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        message:
-          type: string
-          example: "Authentication successful"
-        token:
-          type: string
-          example: "abcd1234"
-    Employee:
-      type: object
-      properties:
-        student_id:
-          type: integer
-        student_name:
-          type: string
-        student_contact:
-          type: string
-        employer_id:
-          type: integer
-          nullable: true
-        employer_name:
-          type: string
-          nullable: true
-        employer_contact:
-          type: string
-          nullable: true
-        employer_address:
-          type: string
-          nullable: true
-        supervisor_id:
-          type: integer
-          nullable: true
-        supervisor_name:
-          type: string
-          nullable: true
-        latest_otp_code:
-          type: string
-          nullable: true
-        expires_at:
-          type: string
-          format: date-time
-          nullable: true
-    TraineeProfileResponse:
-      type: object
-      properties:
-        student_info:
-          type: object
-          properties:
-            first_name:
-              type: string
-              example: "John"
-            last_name:
-              type: string
-              example: "Doe"
-            gender:
-              type: string
-              example: "Male"
-            contact_number:
-              type: string
-              example: "123-456-7890"
-            contact_number_guardian:
-              type: string
-              example: "098-765-4321"
-            remarks:
-              type: string
-              example: "Regular attendance"
-            employer_name:
-              type: string
-              example: "Acme Corp"
-        recent_moods:
-          type: array
-          items:
-            type: object
-            properties:
-              emotion:
-                type: string
-                example: "happy"
-              recorded_at:
-                type: string
-                format: date-time
-                example: "2025-06-01T09:30:00Z"
-              is_daily:
-                type: boolean
-                example: true
-        recent_attendance:
-          type: array
-          items:
-            type: object
-            properties:
-              scheduled_check_in:
-                type: string
-                example: "10:30:00"
-              scheduled_check_out:
-                type: string
-                example: "18:30:00"
-              actual_check_in:
-                type: string
-                format: date-time
-                example: "2025-06-01T10:35:12Z"
-              actual_check_out:
-                type: string
-                format: date-time
-                example: "2025-06-01T18:25:45Z"
-              type: string
-              example: "098-765-4321"
-            remarks:
-              type: string
-              example: "Regular attendance"
-            employer_name:
-              type: string
-              example: "Acme Corp"
-        recent_moods:
-          type: array
-          items:
-            type: object
-            properties:
-              emotion:
-                type: string
-                example: "happy"
-              recorded_at:
-                type: string
-                format: date-time
-                example: "2025-06-01T09:30:00Z"
-              is_daily:
-                type: boolean
-                example: true
-        recent_attendance:
-          type: array
-          items:
-            type: object
-            properties:
-              scheduled_check_in:
-                type: string
-                example: "10:30:00"
-              scheduled_check_out:
-                type: string
-                example: "18:30:00"
-              actual_check_in:
-                type: string
-                format: date-time
-                example: "2025-06-01T10:35:12Z"
-              actual_check_out:
-                type: string
-                format: date-time
-                example: "2025-06-01T18:25:45Z"
-              type: string
-              example: "098-765-4321"
-            remarks:
-              type: string
-              example: "Regular attendance"
-            employer_name:
-              type: string
-              example: "Acme Corp"
-        recent_moods:
-          type: array
-          items:
-            type: object
-            properties:
-              emotion:
-                type: string
-                example: "happy"
-              recorded_at:
-                type: string
-                format: date-time
-                example: "2025-06-01T09:30:00Z"
-              is_daily:
-                type: boolean
-                example: true
-        recent_attendance:
-          type: array
-          items:
-            type: object
-            properties:
-              scheduled_check_in:
-                type: string
-                example: "10:30:00"
-              scheduled_check_out:
-                type: string
-                example: "18:30:00"
-              actual_check_in:
-                type: string
-                format: date-time
-                example: "2025-06-01T10:35:12Z"
-              actual_check_out:
-                type: string
-                format: date-time
-                example: "2025-06-01T18:25:45Z"
