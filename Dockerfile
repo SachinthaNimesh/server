@@ -26,14 +26,20 @@ RUN addgroup -g 10014 -S appgroup && adduser -u 10014 -S appuser -G appgroup
 # Create app directory and set proper ownership
 RUN mkdir -p /app && chown appuser:appgroup /app
 
+# Also create config directory and set ownership
+RUN mkdir -p /app/config && chown appuser:appgroup /app/config
+
 # Set the working directory
 WORKDIR /app
 
 # Copy the built executable from the builder stage
 COPY --from=builder /app/main .
 
-# Change ownership of the executable
-RUN chown appuser:appgroup /app/main
+# Copy the CA certificate into the image
+COPY config/ca.pem /app/config/ca.pem
+
+# Change ownership of the executable and ca.pem
+RUN chown appuser:appgroup /app/main /app/config/ca.pem
 
 # Expose the port your application listens on (if applicable)
 EXPOSE 8080
