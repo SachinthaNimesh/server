@@ -20,8 +20,9 @@ FROM alpine:latest
 # Set the working directory
 WORKDIR /root/
 
-# Create a non-root user and group
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Create a non-root user with a specific UID (e.g., 10014)
+RUN addgroup -g 10014 -S appgroup && adduser -u 10014 -S appuser -G appgroup
+
 
 # Copy the built executable from the builder stage
 COPY --from=builder /app/main .
@@ -33,7 +34,7 @@ RUN chown appuser:appgroup /root/main
 EXPOSE 8080
 
 # Switch to the non-root user
-USER appuser
+USER 10014
 
 # Run the executable
 CMD ["./main"]
