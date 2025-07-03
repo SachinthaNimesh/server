@@ -46,58 +46,80 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 		requestData.CheckIn, requestData.Latitude, requestData.Longitude)
 
 	var attendance models.Attendance
+	now := time.Now().UTC()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	// Always look for today's record first
+	query := `SELECT id, student_id, check_in_lat, check_in_long, check_in_date_time, check_out_lat, check_out_long, check_out_date_time 
+			  FROM attendance 
+			  WHERE student_id = $1 AND check_in_date_time >= $2 AND check_in_date_time < $3 LIMIT 1`
+	row := database.DB.QueryRow(query, studentID, startOfDay, endOfDay)
+	err = row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
+	recordExists := err != sql.ErrNoRows && err == nil
+
 	if requestData.CheckIn {
-		attendance.StudentID = studentID
-		attendance.CheckInLat = requestData.Latitude
-		attendance.CheckInLong = requestData.Longitude
-		attendance.CheckInDateTime = time.Now()
+		// If record exists, update check-in fields with latest values
+		if recordExists {
+			attendance.CheckInLat = requestData.Latitude
+			attendance.CheckInLong = requestData.Longitude
+			attendance.CheckInDateTime = now
 
-		log.Println("Creating new check-in record")
-		query := `INSERT INTO attendance (student_id, check_in_lat, check_in_long, check_in_date_time) VALUES ($1, $2, $3, $4) RETURNING id, student_id, check_in_lat, check_in_long, check_in_date_time`
-		log.Printf("Insert Query: %s", query)
-		log.Printf("Insert Params: student_id=%d, lat=%f, long=%f, datetime=%v", attendance.StudentID, attendance.CheckInLat, attendance.CheckInLong, attendance.CheckInDateTime)
-		row := database.DB.QueryRow(query, attendance.StudentID, attendance.CheckInLat, attendance.CheckInLong, attendance.CheckInDateTime)
-		err := row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime)
-		if err != nil {
-			log.Printf("Database error on insert: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			updateQuery := `UPDATE attendance SET check_in_lat = $1, check_in_long = $2, check_in_date_time = $3 WHERE id = $4`
+			_, err = database.DB.Exec(updateQuery, attendance.CheckInLat, attendance.CheckInLong, attendance.CheckInDateTime, attendance.ID)
+			if err != nil {
+				log.Printf("Failed to update check-in: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			// Fetch updated record for response
+			row = database.DB.QueryRow(query, studentID, startOfDay, endOfDay)
+			_ = row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
+		} else {
+			attendance.StudentID = studentID
+			attendance.CheckInLat = requestData.Latitude
+			attendance.CheckInLong = requestData.Longitude
+			attendance.CheckInDateTime = now
+
+			insertQuery := `INSERT INTO attendance (student_id, check_in_lat, check_in_long, check_in_date_time) VALUES ($1, $2, $3, $4) RETURNING id, student_id, check_in_lat, check_in_long, check_in_date_time, check_out_lat, check_out_long, check_out_date_time`
+			row = database.DB.QueryRow(insertQuery, attendance.StudentID, attendance.CheckInLat, attendance.CheckInLong, attendance.CheckInDateTime)
+			err = row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
+			if err != nil {
+				log.Printf("Database error on insert: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
-		log.Printf("Check-in record created: %+v", attendance)
 	} else {
-		now := time.Now().UTC()
-		startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-		endOfDay := startOfDay.Add(24 * time.Hour)
-
-		query := `SELECT id, student_id, check_in_lat, check_in_long, check_in_date_time, check_out_lat, check_out_long, check_out_date_time 
-                  FROM attendance 
-                  WHERE student_id = $1 AND check_in_date_time >= $2 AND check_in_date_time < $3 LIMIT 1`
-		log.Printf("Select Query: %s", query)
-		log.Printf("Select Params: student_id=%d, start=%v, end=%v", studentID, startOfDay, endOfDay)
-		row := database.DB.QueryRow(query, studentID, startOfDay, endOfDay)
-		err := row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
-		if err != nil {
-			log.Printf("Check-in record not found: %v", err)
-			http.Error(w, "Check-in record not found for today", http.StatusNotFound)
-			return
+		// Must check out only if a record exists for today
+		if !recordExists {
+			// Try to find the latest previous check-in record without a check-out
+			previousQuery := `SELECT id, student_id, check_in_lat, check_in_long, check_in_date_time, check_out_lat, check_out_long, check_out_date_time
+							  FROM attendance
+							  WHERE student_id = $1 AND check_out_date_time IS NULL
+							  ORDER BY check_in_date_time DESC LIMIT 1`
+			row = database.DB.QueryRow(previousQuery, studentID)
+			err = row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
+			if err != nil {
+				log.Printf("No open check-in record found for checkout: %v", err)
+				http.Error(w, "No open check-in record found for checkout", http.StatusNotFound)
+				return
+			}
 		}
-		log.Printf("Fetched attendance for check-out: %+v", attendance)
-
 		attendance.CheckOutLat = sql.NullFloat64{Float64: requestData.Latitude, Valid: true}
 		attendance.CheckOutLong = sql.NullFloat64{Float64: requestData.Longitude, Valid: true}
-		attendance.CheckOutDateTime = sql.NullTime{Time: time.Now(), Valid: true}
+		attendance.CheckOutDateTime = sql.NullTime{Time: now, Valid: true}
 
-		log.Println("Updating existing record with check-out data")
 		updateQuery := `UPDATE attendance SET check_out_lat = $1, check_out_long = $2, check_out_date_time = $3 WHERE id = $4`
-		log.Printf("Update Query: %s", updateQuery)
-		log.Printf("Update Params: lat=%v, long=%v, datetime=%v, id=%d", attendance.CheckOutLat, attendance.CheckOutLong, attendance.CheckOutDateTime, attendance.ID)
 		_, err = database.DB.Exec(updateQuery, attendance.CheckOutLat, attendance.CheckOutLong, attendance.CheckOutDateTime, attendance.ID)
 		if err != nil {
-			log.Printf("Failed to save record: %v", err)
+			log.Printf("Failed to update check-out: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		log.Printf("Check-out updated for record ID: %d", attendance.ID)
+		// Fetch updated record for response
+		row = database.DB.QueryRow(query, studentID, startOfDay, endOfDay)
+		_ = row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
 	}
 
 	log.Println("Successfully processed request, sending response")
