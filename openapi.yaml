@@ -14,6 +14,7 @@ paths:
       summary: Create a new mood
       tags:
         - moods
+      x-wso2-disable-security: true
       security:
         - {}
       requestBody:
@@ -112,6 +113,7 @@ paths:
       summary: Get a student by ID
       tags:
         - students
+      x-wso2-disable-security: true
       security:
         - {}
       parameters:
@@ -270,6 +272,7 @@ paths:
       description: Validate an OTP and generate a secret code
       tags:
         - authentication
+      x-wso2-disable-security: true
       security:
         - {}
       parameters:
@@ -314,6 +317,7 @@ paths:
       description: Verify if a device is authorized using student ID and secret code
       tags:
         - authentication
+      x-wso2-disable-security: true
       security:
         - {}
       requestBody:
@@ -424,6 +428,7 @@ paths:
       description: Handles check-in and check-out attendance records for students.
       tags:
         - attendance
+      x-wso2-disable-security: true
       security:
         - {}
       requestBody:
