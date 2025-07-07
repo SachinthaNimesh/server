@@ -46,18 +46,6 @@ func PostAttendance(w http.ResponseWriter, r *http.Request) {
 		requestData.CheckIn, requestData.Latitude, requestData.Longitude)
 
 	var attendance models.Attendance
-	now := time.Now().UTC()
-	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	endOfDay := startOfDay.Add(24 * time.Hour)
-
-	// Always look for today's record first
-	query := `SELECT id, student_id, check_in_lat, check_in_long, check_in_date_time, check_out_lat, check_out_long, check_out_date_time 
-			  FROM attendance 
-			  WHERE student_id = $1 AND check_in_date_time >= $2 AND check_in_date_time < $3 LIMIT 1`
-	row := database.DB.QueryRow(query, studentID, startOfDay, endOfDay)
-	err = row.Scan(&attendance.ID, &attendance.StudentID, &attendance.CheckInLat, &attendance.CheckInLong, &attendance.CheckInDateTime, &attendance.CheckOutLat, &attendance.CheckOutLong, &attendance.CheckOutDateTime)
-	recordExists := err != sql.ErrNoRows && err == nil
-
 	if requestData.CheckIn {
 		// Delete any existing records for today first
 		now := time.Now().UTC()
