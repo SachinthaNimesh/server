@@ -25,7 +25,7 @@ func ConnectDB() {
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
-	sslrootcert := "config/ca.pem"
+	sslrootcert := "./config/ca.pem"
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
 		log.Fatal("❌ Database connection environment variables are not set properly")

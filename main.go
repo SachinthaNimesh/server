@@ -36,10 +36,10 @@ func main() {
 			"X-Requested-With",
 			"Test-Key",
 			"testkey",
-			"student-id", // Ensure this header is explicitly allowed
+			"student-id",
 		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"*"}), // Adjust as needed
+		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowCredentials(),
 		handlers.ExposedHeaders([]string{
 			"Content-Length",
@@ -53,8 +53,6 @@ func main() {
 
 	// Register API routes
 	routes.RegisterStudentRoutes(router)
-
-	// Add middleware
 
 	// Start the server
 	log.Println("Server started on port", port)
