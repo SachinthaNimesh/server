@@ -713,7 +713,6 @@ components:
           scopes:
             read: Read access to resources
             write: Write access to resources
-            admin: Admin access to all resources
   schemas:
     Mood:
       type: object
