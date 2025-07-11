@@ -34,8 +34,8 @@ func GetManagementTable(w http.ResponseWriter, r *http.Request) {
 			sup.last_name AS supervisor_last_name,
 			sup.contact_number AS supervisor_contact_number
 		FROM student AS s
-		LEFT JOIN employer AS e ON s.id = e.student_id
-		LEFT JOIN supervisor AS sup ON s.id = sup.student_id
+		LEFT JOIN employer AS e ON s.employer_id = e.id
+		LEFT JOIN supervisor AS sup ON s.supervisor_id = sup.supervisor_id
 	`
 
 	rows, err := database.DB.Query(query)
