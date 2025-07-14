@@ -104,7 +104,7 @@ func ValidateLocationHandler() http.HandlerFunc {
 			INNER JOIN 
 				student AS s 
 			ON 
-				e.student_id = s.id
+				e.id = s.employer_id
 			WHERE s.id = $1
 			LIMIT 1
 		`

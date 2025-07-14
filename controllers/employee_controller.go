@@ -41,7 +41,7 @@ func GetEmployeeData(w http.ResponseWriter, r *http.Request) {
 			o.expires_at
 		FROM 
 			student s
-		LEFT JOIN employer e ON s.id = e.student_id
+		LEFT JOIN employer e ON s.employer_id = e.id
 		LEFT JOIN supervisor sup ON s.supervisor_id = sup.supervisor_id
 		LEFT JOIN LATERAL (
 			SELECT otp_code, expires_at
