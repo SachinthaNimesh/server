@@ -21,7 +21,6 @@ import (
 //
 //	@Param employer body struct {
 //		Name          string  `json:"name"`
-//		StudentID     int     `json:"student_id"`
 //		ContactNumber string  `json:"contact_number"`
 //		AddressLine1  string  `json:"address_line_1"`
 //		AddressLine2  string  `json:"address_line_2"`
@@ -37,7 +36,6 @@ import (
 func CreateEmployer(w http.ResponseWriter, r *http.Request) {
 	var employerInput struct {
 		Name          string  `json:"name"`
-		StudentID     int     `json:"student_id"`
 		ContactNumber string  `json:"contact_number"`
 		AddressLine1  string  `json:"address_line_1"`
 		AddressLine2  string  `json:"address_line_2"`
@@ -51,10 +49,10 @@ func CreateEmployer(w http.ResponseWriter, r *http.Request) {
 	}
 	var employer models.Employer
 	err := database.DB.QueryRow(
-		`INSERT INTO employer (name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat`,
-		employerInput.Name, employerInput.StudentID, employerInput.ContactNumber, employerInput.AddressLine1, employerInput.AddressLine2, employerInput.AddressLine3, employerInput.Longitude, employerInput.Latitude,
-	).Scan(&employer.ID, &employer.Name, &employer.StudentID, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
+		`INSERT INTO employer (name, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat`,
+		employerInput.Name, employerInput.ContactNumber, employerInput.AddressLine1, employerInput.AddressLine2, employerInput.AddressLine3, employerInput.Longitude, employerInput.Latitude,
+	).Scan(&employer.ID, &employer.Name, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,9 +81,9 @@ func GetEmployer(w http.ResponseWriter, r *http.Request) {
 	}
 	var employer models.Employer
 	err = database.DB.QueryRow(
-		`SELECT id, name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat FROM employer WHERE id = $1`,
+		`SELECT id, name, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat FROM employer WHERE id = $1`,
 		id,
-	).Scan(&employer.ID, &employer.Name, &employer.StudentID, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
+	).Scan(&employer.ID, &employer.Name, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
 	if err == sql.ErrNoRows {
 		http.Error(w, "Employer not found", http.StatusNotFound)
 		return
@@ -107,7 +105,6 @@ func GetEmployer(w http.ResponseWriter, r *http.Request) {
 //
 //	@Param employer body struct {
 //		Name          string  `json:"name"`
-//		StudentID     int     `json:"student_id"`
 //		ContactNumber string  `json:"contact_number"`
 //		AddressLine1  string  `json:"address_line1"`
 //		AddressLine2  string  `json:"address_line2"`
@@ -130,7 +127,6 @@ func UpdateEmployer(w http.ResponseWriter, r *http.Request) {
 	}
 	var employerInput struct {
 		Name          string  `json:"name"`
-		StudentID     int     `json:"student_id"`
 		ContactNumber string  `json:"contact_number"`
 		AddressLine1  string  `json:"address_line1"`
 		AddressLine2  string  `json:"address_line2"`
@@ -143,8 +139,8 @@ func UpdateEmployer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res, err := database.DB.Exec(
-		`UPDATE employer SET name = $1, student_id = $2, contact_number = $3, address_line1 = $4, address_line2 = $5, address_line3 = $6, addr_long = $7, addr_lat = $8 WHERE id = $9`,
-		employerInput.Name, employerInput.StudentID, employerInput.ContactNumber, employerInput.AddressLine1, employerInput.AddressLine2, employerInput.AddressLine3, employerInput.Longitude, employerInput.Latitude, id,
+		`UPDATE employer SET name = $1, contact_number = $2, address_line1 = $3, address_line2 = $4, address_line3 = $5, addr_long = $6, addr_lat = $7 WHERE id = $8`,
+		employerInput.Name, employerInput.ContactNumber, employerInput.AddressLine1, employerInput.AddressLine2, employerInput.AddressLine3, employerInput.Longitude, employerInput.Latitude, id,
 	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -158,9 +154,9 @@ func UpdateEmployer(w http.ResponseWriter, r *http.Request) {
 	// Return the updated employer
 	var employer models.Employer
 	err = database.DB.QueryRow(
-		`SELECT id, name, student_id, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat FROM employer WHERE id = $1`,
+		`SELECT id, name, contact_number, address_line1, address_line2, address_line3, addr_long, addr_lat FROM employer WHERE id = $1`,
 		id,
-	).Scan(&employer.ID, &employer.Name, &employer.StudentID, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
+	).Scan(&employer.ID, &employer.Name, &employer.ContactNumber, &employer.AddressLine1, &employer.AddressLine2, &employer.AddressLine3, &employer.Longitude, &employer.Latitude)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
