@@ -702,6 +702,171 @@ paths:
                       type: string
                     last_name:
                       type: string
+  /get-supervisors:
+    get:
+      summary: Get all supervisors
+      tags:
+        - supervisors
+      security:
+        - OAuth2: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Supervisor"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /get-supervisor:
+    get:
+      summary: Get a supervisor by ID
+      tags:
+        - supervisors
+      security:
+        - OAuth2: []
+      parameters:
+        - name: supervisor-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the supervisor
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+        "400":
+          description: Invalid supervisor ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Supervisor not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /create-supervisor:
+    post:
+      summary: Create a new supervisor
+      tags:
+        - supervisors
+      security:
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Supervisor"
+      responses:
+        "201":
+          description: Supervisor created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /update-supervisor:
+    put:
+      summary: Update a supervisor by ID
+      tags:
+        - supervisors
+      security:
+        - OAuth2: []
+      parameters:
+        - name: supervisor-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the supervisor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Supervisor"
+      responses:
+        "200":
+          description: Supervisor updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supervisor"
+        "400":
+          description: Invalid supervisor ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Supervisor not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /delete-supervisor:
+    delete:
+      summary: Delete a supervisor by ID
+      tags:
+        - supervisors
+      security:
+        - OAuth2: []
+      parameters:
+        - name: supervisor-id
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: The ID of the supervisor
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid supervisor ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     OAuth2:
@@ -961,3 +1126,17 @@ components:
                 type: string
                 format: date-time
                 example: "2025-06-01T18:25:45Z"
+    Supervisor:
+      type: object
+      properties:
+        supervisor_id:
+          type: integer
+          format: int64
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email_address:
+          type: string
+        contact_number:
+          type: string
